@@ -147,7 +147,8 @@
 
 <script>
   // DÁN LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQgYJRmN2QopZxt9MNkJHfFQpT9P5SbS6lffFO1p6ro9Gm6y6HtZsOeUZAY9f4uKBCTQ/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFeYw3x-Uq4HqKXAqspSEOkfHhP7k_dWdRQnmleCH8emwGKaYwCsd9F1w-v0Eew25_NQ/exec";
+ 
   const submissionId = crypto.randomUUID();
 
   // Dữ liệu nội dung đề thi gốc (Hoàn toàn không có đáp án, an toàn bảo mật)
@@ -264,10 +265,13 @@
     return arr;
   }
 
+  let examSnapshot = [];
+
   // Khởi tạo hiển thị đề thi với thứ tự ngẫu nhiên
   function renderQuiz() {
     const container = document.getElementById("questionsContainer");
     container.innerHTML = "";
+    examSnapshot = [];
 
     // Trộn ngẫu nhiên thứ tự 10 câu hỏi
     const shuffledQuestions = shuffle(rawQuestions);
@@ -277,6 +281,7 @@
       // Trộn ngẫu nhiên thứ tự các ý phát biểu trong câu
       const shuffledItems = shuffle(q.items);
       const labels = ['a', 'b', 'c', 'd'];
+      examSnapshot.push({ questionId: q.id, header: q.header, items: shuffledItems.map(item => ({key: item.key, text: item.text})) });
 
       let rowsHtml = "";
       shuffledItems.forEach((item, itemIdx) => {
@@ -356,7 +361,9 @@
       hoTen: hoTen,
       lop: lop,
       stt: stt,
-      answers: JSON.stringify(userAnswers)
+      answers: JSON.stringify(userAnswers),
+      examSnapshot: JSON.stringify(examSnapshot),
+      examVersion: "TX1-2026-10-04-v2"
     };
 
     // Gửi dữ liệu và chỉ báo thành công khi nhận được xác nhận từ máy chủ
