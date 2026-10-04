@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đề thi tham khảo Tin học 12 - Mạng & Internet</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-light: #eff6ff;
+      --text: #1f2937;
+      --border: #e5e7eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #059669;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px 12px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+      text-align: center;
+      border-top: 5px solid var(--primary);
+    }
+    header h2 { font-size: 15px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    header h1 { font-size: 22px; color: var(--primary); margin: 8px 0; }
+    header p { font-size: 14px; color: #4b5563; }
+    
+    .section-title {
+      background: var(--primary);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 32px 0 16px;
+      text-transform: uppercase;
+    }
+    .question-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+    .q-header {
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 10px;
+      font-size: 15.5px;
+    }
+    .options-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .options-table th, .options-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 14.5px;
+    }
+    .options-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      text-align: center;
+    }
+    .statement { width: 76%; text-align: justify; }
+    .col-choice { width: 12%; text-align: center; }
+    .col-choice input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    /* Toolbar */
+    .controls {
+      position: sticky;
+      bottom: 20px;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      border: 1px solid var(--border);
+      z-index: 100;
+    }
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14.5px;
+      transition: all 0.2s;
+    }
+    .btn-submit { background: var(--primary); color: white; }
+    .btn-submit:hover { background: #1d4ed8; }
+    .btn-reset { background: #e5e7eb; color: #374151; margin-left: 8px; }
+    .btn-reset:hover { background: #d1d5db; }
+    .score-box {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--primary);
+    }
+    
+    /* Feedback styling */
+    .correct-ans { background-color: #dcfce7 !important; color: #166534; font-weight: 600; }
+    .wrong-ans { background-color: #fee2e2 !important; color: #991b1b; }
+    
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #9ca3af;
+      font-size: 13px;
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    
+    <h1>CHỦ ĐỀ: MẠNG & INTERNET</h1>
+    <p>Ôn tập trắc nghiệm Đúng / Sai (Bài 3 & Bài 4 - Tin học 12)</p>
+  </header>
+
+  <form id="quizForm">
+    <!-- BÀI 3 -->
+    <div class="section-title">PHẦN I: BÀI 3 — MỘT SỐ THIẾT BỊ MẠNG THÔNG DỤNG</div>
+
+    <!-- Câu 1 -->
+    <div class="question-card" id="q1">
+      <div class="q-header">Câu 1: Nhìn bên ngoài, rất khó phân biệt được switch và hub do cùng có các cổng cắm cáp mạng. Tuy nhiên, điểm khác nhau cơ bản nằm ở cách thức hoạt động: khi máy tính gửi dữ liệu qua một cổng của hub, tín hiệu được phát tán đến tất cả các cổng còn lại. Trong khi đó, switch xác định chính xác cổng của thiết bị nhận, thiết lập tạm thời kênh truyền riêng và hủy kết nối sau khi truyền xong.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Hub hoạt động theo cơ chế phát tán tín hiệu nhận được từ một cổng ra tất cả các cổng còn lại của thiết bị.</td><td class="col-choice"><input type="radio" name="q1_a" value="true"></td><td class="col-choice"><input type="radio" name="q1_a" value="false"></td></tr>
+          <tr data-ans="true"><td>b</td><td class="statement">Do switch tạo kênh truyền riêng giữa hai cổng gửi và nhận nên nó giảm thiểu triệt để hiện tượng xung đột dữ liệu so với hub.</td><td class="col-choice"><input type="radio" name="q1_b" value="true"></td><td class="col-choice"><input type="radio" name="q1_b" value="false"></td></tr>
+          <tr data-ans="false"><td>c</td><td class="statement">Trong một phòng máy tính gồm 40 máy thường xuyên truyền tệp dung lượng lớn, việc thay thế switch bằng hub sẽ giúp tăng tốc độ truyền mạng và tiết kiệm điện năng.</td><td class="col-choice"><input type="radio" name="q1_c" value="true"></td><td class="col-choice"><input type="radio" name="q1_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Nếu kẻ xấu cắm một máy tính vào cổng còn trống của hub trong mạng LAN nội bộ, kẻ đó có thể thu thập (sniff) toàn bộ gói tin đang truyền giữa hai máy tính khác trong mạng đó mà không cần can thiệp phức tạp.</td><td class="col-choice"><input type="radio" name="q1_d" value="true"></td><td class="col-choice"><input type="radio" name="q1_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 2 -->
+    <div class="question-card" id="q2">
+      <div class="q-header">Câu 2: Xung đột tín hiệu (collision) xảy ra khi nhiều máy tính đồng thời gửi dữ liệu lên đường truyền chung, làm tín hiệu bị hỏng và buộc phải truyền lại. Với mạng quy mô gia đình ít thiết bị, hub có thể được sử dụng vì chi phí rẻ. Nhưng với mạng từ vài chục đến hàng trăm máy tính, người ta luôn sử dụng switch, thậm chí chia nhiều tầng switch kết hợp hub ở tầng cuối cùng.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Hiện tượng xung đột tín hiệu xảy ra khi nhiều thiết bị đồng thời gửi dữ liệu lên cùng một đường truyền chung.</td><td class="col-choice"><input type="radio" name="q2_a" value="true"></td><td class="col-choice"><input type="radio" name="q2_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Số lượng máy tính kết nối vào một hub càng nhiều thì xác suất xảy ra xung đột dữ liệu trên đường truyền càng giảm.</td><td class="col-choice"><input type="radio" name="q2_b" value="true"></td><td class="col-choice"><input type="radio" name="q2_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Mô hình mạng LAN quy mô doanh nghiệp có thể kết hợp switch nhiều tầng ở các nhánh chính và hub ở tầng cuối kết nối một cụm 2-3 máy ít dùng để tiết kiệm chi phí.</td><td class="col-choice"><input type="radio" name="q2_c" value="true"></td><td class="col-choice"><input type="radio" name="q2_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Khi hai máy tính kết nối qua switch đang trao đổi dữ liệu tốc độ cao thì cuộc trao đổi đồng thời giữa hai máy tính khác cắm ở hai cổng khác của switch đó lập tức bị gián đoạn và xung đột.</td><td class="col-choice"><input type="radio" name="q2_d" value="true"></td><td class="col-choice"><input type="radio" name="q2_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 3 -->
+    <div class="question-card" id="q3">
+      <div class="q-header">Câu 3: Wi-Fi (Wireless Fidelity) là bộ tiêu chuẩn kĩ thuật truyền dữ liệu bằng sóng vô tuyến điện được sử dụng rộng rãi trong mạng cục bộ. Điểm truy cập không dây (Wireless Access Point - WAP) cho phép các thiết bị đầu cuối hỗ trợ Wi-Fi kết nối vào mạng LAN mà không cần dây cáp mạng phức tạp.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Wi-Fi là chữ viết tắt của Wireless Fidelity, sử dụng sóng vô tuyến điện để truyền dữ liệu trong mạng cục bộ.</td><td class="col-choice"><input type="radio" name="q3_a" value="true"></td><td class="col-choice"><input type="radio" name="q3_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">WAP chỉ có thể hoạt động độc lập để tạo ra một mạng LAN không dây mới mà hoàn toàn không thể nối vào mạng LAN có dây sẵn có.</td><td class="col-choice"><input type="radio" name="q3_a" value="true"></td><td class="col-choice"><input type="radio" name="q3_a" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Để kết nối một máy tính để bàn cũ (không tích hợp card Wi-Fi) vào mạng không dây của trường học thông qua WAP, người quản trị cần lắp thêm bảng mạch hoặc bộ chuyển đổi Wi-Fi cho máy tính đó.</td><td class="col-choice"><input type="radio" name="q3_c" value="true"></td><td class="col-choice"><input type="radio" name="q3_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Trong một văn phòng có 100 nhân viên sử dụng laptop kết nối Wi-Fi, việc bố trí duy nhất một trạm WAP dân dụng đặt tại góc tường khuất là giải pháp tối ưu đảm bảo băng thông và độ ổn định cao nhất.</td><td class="col-choice"><input type="radio" name="q3_d" value="true"></td><td class="col-choice"><input type="radio" name="q3_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 4 -->
+    <div class="question-card" id="q4">
+      <div class="q-header">Câu 4: Khi kết nối hai máy tính thuộc hai mạng LAN khác nhau qua Internet, người ta không thể dùng cáp mạng nối qua hub hay switch mà cần sử dụng dịch vụ của nhà cung cấp viễn thông. Mạng viễn thông sử dụng các bộ định tuyến (router) để chuyển tiếp dữ liệu giữa các mạng.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Router là thiết bị mạng có chức năng chuyển tiếp dữ liệu và dẫn đường giữa các mạng LAN khác nhau qua Internet.</td><td class="col-choice"><input type="radio" name="q4_a" value="true"></td><td class="col-choice"><input type="radio" name="q4_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Cổng LAN trên router dùng để kết nối với các router khác trên Internet, còn cổng WAN dùng để kết nối với mạng nội bộ.</td><td class="col-choice"><input type="radio" name="q4_b" value="true"></td><td class="col-choice"><input type="radio" name="q4_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Nếu một router có nhiều cổng WAN kết nối đến các nhà mạng viễn thông khác nhau, nó phải thực hiện quy trình định tuyến (routing) để chọn cổng xuất gói tin tối ưu nhất đến mạng nhận.</td><td class="col-choice"><input type="radio" name="q4_c" value="true"></td><td class="col-choice"><input type="radio" name="q4_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Hai máy tính ở hai chi nhánh ngân hàng (Hà Nội và TP.HCM) có thể liên lạc trực tiếp an toàn với nhau chỉ bằng một dây cáp mạng UTP cắm qua một Switch 8 cổng duy nhất.</td><td class="col-choice"><input type="radio" name="q4_d" value="true"></td><td class="col-choice"><input type="radio" name="q4_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 5 -->
+    <div class="question-card" id="q5">
+      <div class="q-header">Câu 5: Router của các nhà mạng hoặc tổ chức lớn có nhiều cổng WAN và thực hiện thuật toán định tuyến phức tạp. Ngược lại, router sử dụng trong các gia đình thường chỉ có một cổng WAN kết nối đến nhà cung cấp dịch vụ Internet (ISP) và được tích hợp sẵn cả bộ thu phát Wi-Fi cùng switch thu nhỏ (gọi là Router Wi-Fi).</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Router gia đình thường có 1 cổng WAN và được tích hợp bộ thu phát Wi-Fi nên được gọi là router Wi-Fi.</td><td class="col-choice"><input type="radio" name="q5_a" value="true"></td><td class="col-choice"><input type="radio" name="q5_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Router Wi-Fi gia đình chỉ có duy nhất chức năng phát sóng vô tuyến, hoàn toàn không có khả năng cấp cổng kết nối mạng có dây.</td><td class="col-choice"><input type="radio" name="q5_b" value="true"></td><td class="col-choice"><input type="radio" name="q5_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi kết nối Internet cho gia đình, dây cáp từ modem quang của nhà mạng ISP phải được cắm vào cổng WAN của router Wi-Fi để cấp mạng cho toàn bộ gia đình.</td><td class="col-choice"><input type="radio" name="q5_c" value="true"></td><td class="col-choice"><input type="radio" name="q5_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Do router gia đình chỉ có một cổng WAN nên gói tin đi ra Internet từ các máy tính nội bộ không cần thuật toán chọn đường giữa nhiều cổng WAN như ở router đường trục ISP.</td><td class="col-choice"><input type="radio" name="q5_d" value="true"></td><td class="col-choice"><input type="radio" name="q5_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 6 -->
+    <div class="question-card" id="q6">
+      <div class="q-header">Câu 6: Tín hiệu trong LAN là tín hiệu số (digital) thể hiện các giá trị logic 0 hay 1. Để truyền dữ liệu ra bên ngoài qua môi trường viễn thông (cáp quang, sóng vô tuyến, cáp đồng thoại), người ta dùng tín hiệu tương tự (analog). Modem là thiết bị chuyển đổi tín hiệu hai chiều (điều chế và giải điều chế) đặt giữa router và nhà cung cấp dịch vụ.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Modem là từ viết tắt của Modulation (điều chế) và Demodulation (giải điều chế xung).</td><td class="col-choice"><input type="radio" name="q6_a" value="true"></td><td class="col-choice"><input type="radio" name="q6_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Quá trình biến đổi tín hiệu từ dạng tương tự (analog) thành dạng số (digital) tại modem được gọi là điều chế xung (Modulation).</td><td class="col-choice"><input type="radio" name="q6_b" value="true"></td><td class="col-choice"><input type="radio" name="q6_b" value="false"></td></tr>
+          <tr data-ans="false"><td>c</td><td class="statement">Khi chuyển đổi tín hiệu, modem làm thay đổi hoàn toàn nội dung thông tin và cấu trúc dữ liệu nhị phân của các gói tin gửi đi.</td><td class="col-choice"><input type="radio" name="q6_c" value="true"></td><td class="col-choice"><input type="radio" name="q6_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Hiện nay ở các gia đình, người dùng ít thấy một modem quang rời và một router rời vì nhà mạng đã tích hợp bộ chuyển đổi quang (modem), router định tuyến và bộ phát Wi-Fi vào trong cùng một thiết bị duy nhất.</td><td class="col-choice"><input type="radio" name="q6_d" value="true"></td><td class="col-choice"><input type="radio" name="q6_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 7 -->
+    <div class="question-card" id="q7">
+      <div class="q-header">Câu 7: Để đáp ứng các hạ tầng truyền dẫn khác nhau, nhiều loại modem đã được sử dụng qua các thời kì như modem quay số (dial-up), modem ADSL dùng cáp điện thoại, modem quang dùng cáp sợi quang và modem GSM sử dụng thẻ SIM để kết nối vào mạng viễn thông di động 3G, 4G, 5G.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Modem quang là thiết bị chuyển đổi giữa tín hiệu số của mạng máy tính và tín hiệu ánh sáng truyền qua cáp quang.</td><td class="col-choice"><input type="radio" name="q7_a" value="true"></td><td class="col-choice"><input type="radio" name="q7_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Modem ADSL truyền dữ liệu trên cùng tần số âm thanh với tín hiệu đàm thoại của điện thoại cố định.</td><td class="col-choice"><input type="radio" name="q7_b" value="true"></td><td class="col-choice"><input type="radio" name="q7_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Trên các chuyến xe khách du lịch liên tỉnh, người ta lắp đặt modem GSM tích hợp bộ phát Wi-Fi để hành khách có thể dùng Internet qua sóng 4G/5G di động.</td><td class="col-choice"><input type="radio" name="q7_c" value="true"></td><td class="col-choice"><input type="radio" name="q7_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Nếu nhà trường chuyển từ gói cước Internet cáp đồng ADSL sang mạng cáp quang FTTH, nhà trường vẫn có thể cắm trực tiếp sợi cáp quang vào cổng điện thoại RJ11 của modem ADSL cũ để dùng mạng bình thường.</td><td class="col-choice"><input type="radio" name="q7_d" value="true"></td><td class="col-choice"><input type="radio" name="q7_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 8 -->
+    <div class="question-card" id="q8">
+      <div class="q-header">Câu 8: Các mạng LAN thông thường sử dụng cáp mạng UTP gồm bốn đôi dây xoắn với giắc cắm chuẩn RJ45 để kết nối giữa máy tính với switch, hub hoặc cổng LAN của router. Việc cắm đúng cáp mạng vào cổng RJ45 mới chỉ hoàn tất kết nối vật lí; để trao đổi dữ liệu, hệ thống còn cần thiết lập các thông số kết nối logic.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Cáp mạng UTP thông dụng trong mạng LAN gồm có 4 đôi dây xoắn và sử dụng đầu nối chuẩn RJ45.</td><td class="col-choice"><input type="radio" name="q8_a" value="true"></td><td class="col-choice"><input type="radio" name="q8_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Khi cắm một đầu cáp RJ45 vào máy tính và đầu kia vào switch thì máy tính lập tức tự động lướt web trên Internet mà không cần bất kì thiết lập logic hay cấu hình IP nào.</td><td class="col-choice"><input type="radio" name="q8_b" value="true"></td><td class="col-choice"><input type="radio" name="q8_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi bấm đầu mạng chuẩn RJ45, nếu các sợi dây bên trong bị đảo lộn không đúng theo quy chuẩn chân truyền/nhận tín hiệu thì kết nối mạng vật lí giữa máy tính và switch sẽ bị lỗi hoặc không nhận diện được.</td><td class="col-choice"><input type="radio" name="q8_c" value="true"></td><td class="col-choice"><input type="radio" name="q8_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Trong phòng máy tính của trường học, việc ưu tiên sử dụng cáp UTP nối trực tiếp từ switch đến từng máy tính thay vì dùng toàn bộ Wi-Fi giúp đảm bảo tốc độ ổn định cao, giảm độ trễ và tránh can nhiễu sóng khi cả lớp cùng tải dữ liệu.</td><td class="col-choice"><input type="radio" name="q8_d" value="true"></td><td class="col-choice"><input type="radio" name="q8_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 9 -->
+    <div class="question-card" id="q9">
+      <div class="q-header">Câu 9: Quy trình kết nối thiết bị di động hoặc máy tính vào mạng Wi-Fi gồm: tìm trạm thu phát Wi-Fi (WAP) trong danh sách hiển thị, kiểm tra trạng thái bảo mật của trạm, chọn tên trạm (SSID), nhập mật khẩu chính xác nếu có biểu tượng ổ khóa, và tùy chọn kích hoạt chế độ 'Tự động kết nối lại'.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Biểu tượng hình ổ khóa cạnh tên mạng Wi-Fi cho biết mạng đó được thiết lập chế độ bảo mật và người dùng phải nhập đúng mật khẩu để truy cập.</td><td class="col-choice"><input type="radio" name="q9_a" value="true"></td><td class="col-choice"><input type="radio" name="q9_a" value="false"></td></tr>
+          <tr data-ans="true"><td>b</td><td class="statement">Khi đánh dấu chọn mục 'Connect automatically' (hoặc 'Tự động kết nối lại'), thiết bị sẽ tự động kết nối với mạng Wi-Fi đó ở các lần sau mà không cần hỏi lại mật khẩu.</td><td class="col-choice"><input type="radio" name="q9_b" value="true"></td><td class="col-choice"><input type="radio" name="q9_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Trên hệ điều hành di động iOS, người dùng có thể chia sẻ mật khẩu Wi-Fi đã lưu cho một thiết bị Apple khác ở gần mà không cần trực tiếp nhập từng kí tự mật khẩu bằng tay.</td><td class="col-choice"><input type="radio" name="q9_c" value="true"></td><td class="col-choice"><input type="radio" name="q9_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Một người lạ mang laptop đến quán cà phê có thể truy cập thành công vào mạng Wi-Fi có mật khẩu mạnh mà không cần mật khẩu, chỉ bằng cách đặt laptop thật gần bộ phát Wi-Fi.</td><td class="col-choice"><input type="radio" name="q9_d" value="true"></td><td class="col-choice"><input type="radio" name="q9_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 10 -->
+    <div class="question-card" id="q10">
+      <div class="q-header">Câu 10: Trong thiết kế hệ thống mạng, mỗi thiết bị mạng như Hub, Switch, Wireless Access Point, Router và Modem đều giữ một vai trò chuyên biệt ở các cấp độ truyền thông khác nhau, phối hợp để hình thành nên hạ tầng mạng cục bộ và kết nối liên mạng toàn cầu.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Switch và Hub đều là các thiết bị dùng để kết nối các máy tính trong cùng một mạng LAN thông qua cáp mạng.</td><td class="col-choice"><input type="radio" name="q10_a" value="true"></td><td class="col-choice"><input type="radio" name="q10_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Hub có khả năng tự động phân tích địa chỉ IP của gói tin để định tuyến đường đi ngắn nhất giữa hai chi nhánh ngân hàng.</td><td class="col-choice"><input type="radio" name="q10_b" value="true"></td><td class="col-choice"><input type="radio" name="q10_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Để kết nối mạng cho một tòa nhà 3 tầng gồm 60 máy tính bàn và hệ thống smartphone của nhân viên lướt web, phương án hợp lí là đặt modem/router ở tầng trệt, sử dụng switch chia mạng có dây đến từng phòng và bổ sung các WAP ở mỗi tầng.</td><td class="col-choice"><input type="radio" name="q10_c" value="true"></td><td class="col-choice"><input type="radio" name="q10_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Nếu ta tháo bỏ toàn bộ router và modem trong một gia đình, các máy tính để bàn cắm chung vào một Switch vẫn có thể chia sẻ tài liệu và máy in dùng chung trong mạng nội bộ với nhau.</td><td class="col-choice"><input type="radio" name="q10_d" value="true"></td><td class="col-choice"><input type="radio" name="q10_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- BÀI 4 -->
+    <div class="section-title">PHẦN II: BÀI 4 — GIAO THỨC MẠNG</div>
+
+    <!-- Câu 11 -->
+    <div class="question-card" id="q11">
+      <div class="q-header">Câu 11: Tập hợp các quy định về cách thức giao tiếp để truyền nhận dữ liệu giữa các đối tượng tham gia mạng gọi là giao thức mạng (network protocol). Tất cả các hoạt động truyền thông trên mạng đều cần có giao thức giúp việc gửi, nhận dữ liệu được thực hiện chính xác, tin cậy và hiệu quả.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Giao thức mạng là tập hợp các quy tắc, quy định về cách thức giao tiếp và truyền nhận dữ liệu qua mạng.</td><td class="col-choice"><input type="radio" name="q11_a" value="true"></td><td class="col-choice"><input type="radio" name="q11_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Giao thức mạng chỉ quy định về mức giá cước viễn thông và thủ tục đóng tiền thuê bao Internet của khách hàng.</td><td class="col-choice"><input type="radio" name="q11_b" value="true"></td><td class="col-choice"><input type="radio" name="q11_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Trong hệ thống gửi nhận thư điện tử, giao thức SMTP đảm nhận quy định gửi thư từ máy người gửi đến máy chủ, còn POP3 hoặc IMAP quy định cách nhận và tải thư về máy người nhận.</td><td class="col-choice"><input type="radio" name="q11_c" value="true"></td><td class="col-choice"><input type="radio" name="q11_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Nếu hai máy tính kết nối mạng với nhau nhưng một bên sử dụng quy tắc đóng gói dữ liệu hoàn toàn khác với bên kia, hai máy vẫn giao tiếp được vì tín hiệu điện trên dây cáp là tương đương.</td><td class="col-choice"><input type="radio" name="q11_d" value="true"></td><td class="col-choice"><input type="radio" name="q11_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 12 -->
+    <div class="question-card" id="q12">
+      <div class="q-header">Câu 12: Giao thức Ethernet là chuẩn truyền thông phổ biến trong mạng cục bộ LAN. Ethernet đưa ra các quy định chặt chẽ về: địa chỉ vật lí MAC (Media Access Control), mã kiểm tra phát hiện lỗi truyền tin, quy định chia nhỏ dữ liệu thành khung (frame) có độ dài xác định và cách xử lí khi xảy ra xung đột tín hiệu.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Địa chỉ MAC là địa chỉ vật lí bằng số đi theo phần cứng của thiết bị mạng tham gia truyền thông.</td><td class="col-choice"><input type="radio" name="q12_a" value="true"></td><td class="col-choice"><input type="radio" name="q12_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Giao thức Ethernet cho phép gửi một luồng dữ liệu dài vô hạn liên tục trong nhiều ngày mà không cần chia thành các khung truyền nhỏ.</td><td class="col-choice"><input type="radio" name="q12_b" value="true"></td><td class="col-choice"><input type="radio" name="q12_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi máy tính nhận được một khung dữ liệu Ethernet, nó sử dụng mã kiểm tra (checksum) đi kèm gói tin để kiểm tra lỗi; nếu phát hiện dữ liệu bị hỏng trong quá trình truyền, nó sẽ yêu cầu gửi lại.</td><td class="col-choice"><input type="radio" name="q12_c" value="true"></td><td class="col-choice"><input type="radio" name="q12_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Hai máy tính khác nhau trên thế giới được sản xuất bởi hai hãng phần cứng uy tín có thể được cấp trùng nhau một địa chỉ MAC duy nhất để tiết kiệm bộ nhớ.</td><td class="col-choice"><input type="radio" name="q12_d" value="true"></td><td class="col-choice"><input type="radio" name="q12_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 13 -->
+    <div class="question-card" id="q13">
+      <div class="q-header">Câu 13: Internet là mạng thông tin toàn cầu hoạt động dựa trên bộ giao thức TCP/IP. Trong đó, hai giao thức chủ chốt đóng vai trò nền tảng xác định cách thức kết nối và trao đổi dữ liệu đặc thù của mạng toàn cầu này là IP (Internet Protocol) và TCP (Transmission Control Protocol).</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Bộ giao thức nền tảng chi phối toàn bộ hoạt động liên mạng của Internet là TCP/IP.</td><td class="col-choice"><input type="radio" name="q13_a" value="true"></td><td class="col-choice"><input type="radio" name="q13_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Giao thức IP chịu trách nhiệm đảm bảo các gói tin không bao giờ bị thất lạc và tự động sắp xếp lại thứ tự gói tin tại ứng dụng nhận.</td><td class="col-choice"><input type="radio" name="q13_b" value="true"></td><td class="col-choice"><input type="radio" name="q13_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Sự phối hợp giữa TCP và IP thể hiện ở chỗ: IP dẫn đường chuyển các gói tin từ mạng nguồn đến mạng đích, còn TCP kiểm soát việc gửi - nhận chính xác ở mức ứng dụng.</td><td class="col-choice"><input type="radio" name="q13_c" value="true"></td><td class="col-choice"><input type="radio" name="q13_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Nếu ta thay thế hoàn toàn bộ giao thức TCP/IP bằng giao thức truyền thông của mạng điện thoại cố định độc chiếm kênh, Internet sẽ phục vụ đồng thời hàng tỉ người dùng hiệu quả hơn.</td><td class="col-choice"><input type="radio" name="q13_d" value="true"></td><td class="col-choice"><input type="radio" name="q13_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 14 -->
+    <div class="question-card" id="q14">
+      <div class="q-header">Câu 14: Giao thức IP có hai nội dung chính là cách đánh địa chỉ và định tuyến để dẫn dữ liệu từ LAN của máy gửi đến LAN của máy nhận. Mỗi địa chỉ IPv4 gồm 4 byte (32 bit), thường được biểu diễn dưới dạng bốn số thập phân ngăn cách bởi dấu chấm (dot decimal notation).</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Địa chỉ IPv4 gồm có 4 byte (tương ứng với 32 bit nhị phân).</td><td class="col-choice"><input type="radio" name="q14_a" value="true"></td><td class="col-choice"><input type="radio" name="q14_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Trong cách viết dot decimal của IPv4, giá trị của mỗi byte trong chuỗi có thể nằm trong khoảng từ 0 đến 512.</td><td class="col-choice"><input type="radio" name="q14_b" value="true"></td><td class="col-choice"><input type="radio" name="q14_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Chuỗi nhị phân 11000000 10101000 00000001 00000011 được biểu diễn chính xác ở dạng thập phân là 192.168.1.3.</td><td class="col-choice"><input type="radio" name="q14_c" value="true"></td><td class="col-choice"><input type="radio" name="q14_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Địa chỉ '192.168.1.300' là một địa chỉ IPv4 hoàn toàn hợp lệ để gán cho máy tính trong mạng phòng thực hành.</td><td class="col-choice"><input type="radio" name="q14_d" value="true"></td><td class="col-choice"><input type="radio" name="q14_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 15 -->
+    <div class="question-card" id="q15">
+      <div class="q-header">Câu 15: Gói tin gửi đi trên Internet luôn chứa địa chỉ IP của máy gửi và máy nhận. Tuy nhiên, khi gói tin chuyển trên đường truyền vật lí nội bộ, nó cần được gán địa chỉ MAC của thiết bị nhận. Mạng có giao thức hỗ trợ lấy địa chỉ MAC theo địa chỉ IP. Nếu IP máy nhận nằm ngoài LAN, gói tin sẽ được gửi đến địa chỉ MAC của router để chuyển ra ngoài.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Trên đường truyền vật lí của mạng, máy tính nhận dạng và chấp nhận gói tin dựa vào địa chỉ MAC của nó.</td><td class="col-choice"><input type="radio" name="q15_a" value="true"></td><td class="col-choice"><input type="radio" name="q15_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Địa chỉ IP và địa chỉ MAC là một, đều được nhà sản xuất nạp cố định vào chip nhớ của card mạng và không thể thay đổi bằng phần mềm.</td><td class="col-choice"><input type="radio" name="q15_b" value="true"></td><td class="col-choice"><input type="radio" name="q15_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi máy tính A gửi dữ liệu cho máy tính B nằm ở mạng LAN khác trên thế giới, ở chặng xuất phát đầu tiên, máy A sẽ đóng gói dữ liệu kèm địa chỉ IP của máy B nhưng mang địa chỉ MAC đích là card mạng của router phòng mình.</td><td class="col-choice"><input type="radio" name="q15_c" value="true"></td><td class="col-choice"><input type="radio" name="q15_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Người dùng có thể mang laptop kết nối vào bất kì mạng Wi-Fi công cộng nào mà không bao giờ bị thay đổi địa chỉ IP cục bộ được cấp phát.</td><td class="col-choice"><input type="radio" name="q15_d" value="true"></td><td class="col-choice"><input type="radio" name="q15_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 16 -->
+    <div class="question-card" id="q16">
+      <div class="q-header">Câu 16: Router chuyển tiếp các gói tin dựa vào bảng định tuyến. Trong phương pháp định tuyến tĩnh, bảng định tuyến ghi rõ từng dải địa chỉ IP sẽ được gửi qua cổng nào, kèm theo một cổng mặc định (default gateway). Phương pháp định tuyến động cho phép thay đổi cổng linh hoạt tùy thuộc tình trạng đường truyền.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Bảng định tuyến trên router hoạt động tương tự như bảng chỉ đường giao thông, chỉ dẫn gói tin đến dải IP nào thì đi qua cổng nào.</td><td class="col-choice"><input type="radio" name="q16_a" value="true"></td><td class="col-choice"><input type="radio" name="q16_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Trong định tuyến tĩnh, nếu địa chỉ đích của gói tin không nằm trong danh mục hướng dẫn của bảng định tuyến, router sẽ lập tức hủy bỏ gói tin và ngắt kết nối Internet.</td><td class="col-choice"><input type="radio" name="q16_b" value="true"></td><td class="col-choice"><input type="radio" name="q16_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Ưu điểm của định tuyến động là khi một đường truyền chính bị đứt cáp hoặc nghẽn mạng nghiêm trọng, router có thể tự động đổi hướng chuyển gói tin sang cổng kết nối dự phòng khác còn thông suốt.</td><td class="col-choice"><input type="radio" name="q16_c" value="true"></td><td class="col-choice"><input type="radio" name="q16_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Giao thức định tuyến IP đảm bảo 100% rằng mọi gói tin của một tệp ảnh lớn gửi qua Internet chắc chắn sẽ đi theo duy nhất một tuyến đường cố định qua các router để tới đích.</td><td class="col-choice"><input type="radio" name="q16_d" value="true"></td><td class="col-choice"><input type="radio" name="q16_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 17 -->
+    <div class="question-card" id="q17">
+      <div class="q-header">Câu 17: Giao thức IP chỉ đảm bảo chuyển dữ liệu giữa các mạng LAN mà không đảm bảo dữ liệu tới đúng một phần mềm cụ thể. Giao thức TCP (Transmission Control Protocol) kiểm soát việc truyền dữ liệu tới mức ứng dụng nhờ cơ chế cấp phát cổng ứng dụng (port number) và gán nhãn cổng vào các gói tin.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Giao thức TCP giúp phân biệt và chuyển đúng dữ liệu cho từng ứng dụng cụ thể đang chạy trên máy tính nhờ số hiệu cổng ứng dụng.</td><td class="col-choice"><input type="radio" name="q17_a" value="true"></td><td class="col-choice"><input type="radio" name="q17_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Một máy tính chỉ có thể chạy duy nhất một ứng dụng mạng tại một thời điểm vì IP và TCP không phân biệt được dữ liệu của các phần mềm khác nhau.</td><td class="col-choice"><input type="radio" name="q17_b" value="true"></td><td class="col-choice"><input type="radio" name="q17_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi người dùng vừa nghe nhạc trực tuyến trên trình duyệt web vừa tải tệp tài liệu qua trình download, cơ chế đánh số cổng của TCP ngăn chặn dữ liệu bài hát bị chuyển nhầm vào tệp tài liệu đang tải.</td><td class="col-choice"><input type="radio" name="q17_c" value="true"></td><td class="col-choice"><input type="radio" name="q17_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Nếu số cổng ứng dụng bị loại bỏ hoàn toàn khỏi gói tin TCP, hệ điều hành của máy nhận vẫn dễ dàng biết chính xác gói tin thuộc về phần mềm Zalo hay phần mềm Trình duyệt Web.</td><td class="col-choice"><input type="radio" name="q17_d" value="true"></td><td class="col-choice"><input type="radio" name="q17_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 18 -->
+    <div class="question-card" id="q18">
+      <div class="q-header">Câu 18: Tại nơi gửi, TCP chia nhỏ dữ liệu thành nhiều gói tin có độ dài xác định và đánh số thứ tự cho từng gói. Các gói tin có thể đi theo các tuyến đường khác nhau qua các router, dẫn đến gói gửi sau có thể đến trước. Tại nơi nhận, TCP sắp xếp lại các gói tin theo đúng thứ tự ban đầu và kiểm tra thất lạc để yêu cầu gửi lại.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Giao thức TCP chia nhỏ dữ liệu thành các gói tin có độ dài xác định và đánh số thứ tự trước khi gửi đi.</td><td class="col-choice"><input type="radio" name="q18_a" value="true"></td><td class="col-choice"><input type="radio" name="q18_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Vì các gói tin di chuyển trên Internet luôn có tốc độ bằng nhau nên chắc chắn gói gửi trước sẽ luôn luôn tới đích trước gói gửi sau.</td><td class="col-choice"><input type="radio" name="q18_b" value="true"></td><td class="col-choice"><input type="radio" name="q18_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Nếu một gói dữ liệu trên đường truyền bị mất do nghẽn router, cơ chế xác nhận (acknowledgement) của TCP sẽ phát hiện gói tin bị thiếu và yêu cầu phía gửi truyền lại gói tin đó.</td><td class="col-choice"><input type="radio" name="q18_c" value="true"></td><td class="col-choice"><input type="radio" name="q18_c" value="false"></td></tr>
+          <tr data-ans="false"><td>d</td><td class="statement">Việc chia dữ liệu thành nhiều gói tin nhỏ độc lập làm giảm hiệu suất mạng và ngăn cản nhiều người dùng chia sẻ chung đường truyền cáp quang.</td><td class="col-choice"><input type="radio" name="q18_d" value="true"></td><td class="col-choice"><input type="radio" name="q18_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 19 -->
+    <div class="question-card" id="q19">
+      <div class="q-header">Câu 19: Bên cạnh bộ giao thức nền tảng TCP/IP, trên Internet còn có nhiều giao thức ứng dụng phổ biến khác như HTTP/HTTPS (truyền tải siêu văn bản cho các trang web) hay giao thức DNS (Domain Name System) giúp chuyển đổi giữa tên miền bằng chữ dễ nhớ và địa chỉ IP của máy chủ.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Giao thức DNS cho phép sử dụng hệ thống tên bằng chữ (tên miền) thay thế cho các địa chỉ IP dạng số khó nhớ.</td><td class="col-choice"><input type="radio" name="q19_a" value="true"></td><td class="col-choice"><input type="radio" name="q19_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Giao thức HTTP là giao thức chuyên trách dùng để chuyển đổi địa chỉ IP số thành địa chỉ MAC phần cứng của máy chủ.</td><td class="col-choice"><input type="radio" name="q19_b" value="true"></td><td class="col-choice"><input type="radio" name="q19_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi nhập địa chỉ 'moet.edu.vn' vào thanh địa chỉ của trình duyệt, dịch vụ DNS sẽ được kích hoạt để tra cứu và tìm ra địa chỉ IP tương ứng của máy chủ Bộ Giáo dục và Đào tạo.</td><td class="col-choice"><input type="radio" name="q19_c" value="true"></td><td class="col-choice"><input type="radio" name="q19_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Nếu máy chủ DNS gặp sự cố ngừng hoạt động hoàn toàn, người dùng vẫn có thể truy cập trực tiếp trang web của máy chủ nếu biết chính xác địa chỉ IP của máy chủ đó.</td><td class="col-choice"><input type="radio" name="q19_d" value="true"></td><td class="col-choice"><input type="radio" name="q19_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Câu 20 -->
+    <div class="question-card" id="q20">
+      <div class="q-header">Câu 20: Lệnh 'ping' trong các hệ điều hành là một tiện ích dòng lệnh dựa trên giao thức ICMP (Internet Control Message Protocol). Lệnh này gửi các gói tin thăm dò đến một địa chỉ IP hoặc tên miền mục tiêu và chờ phản hồi để kiểm tra khả năng kết nối mạng cũng như đo lường thời gian trễ của đường truyền.</div>
+      <table class="options-table">
+        <thead><tr><th>Ý</th><th>Nội dung phát biểu</th><th class="col-choice">Đúng</th><th class="col-choice">Sai</th></tr></thead>
+        <tbody>
+          <tr data-ans="true"><td>a</td><td class="statement">Lệnh ping được sử dụng để kiểm tra máy tính có kết nối được với một thiết bị mạng hoặc máy tính khác hay không.</td><td class="col-choice"><input type="radio" name="q20_a" value="true"></td><td class="col-choice"><input type="radio" name="q20_a" value="false"></td></tr>
+          <tr data-ans="false"><td>b</td><td class="statement">Lệnh ping hoạt động dựa trên giao thức truyền thư điện tử SMTP của máy chủ bưu chính.</td><td class="col-choice"><input type="radio" name="q20_b" value="true"></td><td class="col-choice"><input type="radio" name="q20_b" value="false"></td></tr>
+          <tr data-ans="true"><td>c</td><td class="statement">Khi thực hiện lệnh ping đến địa chỉ router mặc định (Default Gateway) mà nhận được phản hồi 'Request timed out', điều này chứng tỏ kết nối từ máy tính tới router đang bị gián đoạn.</td><td class="col-choice"><input type="radio" name="q20_c" value="true"></td><td class="col-choice"><input type="radio" name="q20_c" value="false"></td></tr>
+          <tr data-ans="true"><td>d</td><td class="statement">Nếu một máy tính ping thành công đến địa chỉ IP '8.8.8.8' (máy chủ Google) với thời gian trễ 15ms nhưng không vào được trang web bằng tên miền 'google.com', nguyên nhân có thể do cấu hình DNS của máy tính đang gặp lỗi.</td><td class="col-choice"><input type="radio" name="q20_d" value="true"></td><td class="col-choice"><input type="radio" name="q20_d" value="false"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Nút điều khiển -->
+    <div class="controls">
+      <div class="score-box" id="scoreDisplay">Chưa nộp bài</div>
+      <div>
+        <button type="button" class="btn btn-submit" onclick="submitQuiz()">Nộp bài & Chấm điểm</button>
+        <button type="reset" class="btn btn-reset" onclick="resetForm()">Làm lại</button>
+      </div>
+    </div>
+  </form>
+
+  <footer>
+    Tài liệu ôn tập Tin học 12 — Phân môn Mạng máy tính & Internet
+  </footer>
+</div>
+
+<script>
+  function submitQuiz() {
+    let totalScore = 0;
+    const cards = document.querySelectorAll('.question-card');
+    
+    cards.forEach(card => {
+      let correctInQuestion = 0;
+      const rows = card.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const expected = row.getAttribute('data-ans');
+        const selected = row.querySelector('input[type="radio"]:checked');
+        
+        row.classList.remove('correct-ans', 'wrong-ans');
+        if (selected) {
+          if (selected.value === expected) {
+            correctInQuestion++;
+            row.classList.add('correct-ans');
+          } else {
+            row.classList.add('wrong-ans');
+          }
+        }
+      });
+      
+      // Quy chuẩn điểm thi tốt nghiệp THPT dạng Đúng/Sai (tối đa 1 điểm / câu)
+      if (correctInQuestion === 1) totalScore += 0.1;
+      else if (correctInQuestion === 2) totalScore += 0.25;
+      else if (correctInQuestion === 3) totalScore += 0.5;
+      else if (correctInQuestion === 4) totalScore += 1.0;
+    });
+
+    const display = document.getElementById('scoreDisplay');
+    display.innerHTML = `Điểm của bạn: <span style="color:#dc2626">${totalScore.toFixed(2)} / 20.0</span>`;
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('correct-ans', 'wrong-ans'));
+    document.getElementById('scoreDisplay').innerText = 'Chưa nộp bài';
+  }
+</script>
+</body>
+</html>
