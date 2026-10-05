@@ -112,8 +112,7 @@
 
 <div class="container">
   <header>
-    <h2>TRƯỜNG THCS VÀ THPT VĨNH LỘC — TỔ TIẾNG ANH - TIN HỌC</h2>
-    <h1>KIỂM TRA THƯỜNG XUYÊN 1 — MÔN TIN HỌC 12</h1>
+       <h1>KIỂM TRA THƯỜNG XUYÊN 1 — MÔN TIN HỌC 12</h1>
     <p>Thời gian làm bài: 15 phút (Đề gồm 10 câu trắc nghiệm Đúng / Sai — Trộn ngẫu nhiên câu và ý)</p>
   </header>
 
@@ -135,12 +134,18 @@
     </div>
 
     <!-- KHUNG CHỨA CÁC CÂU HỎI TRỘN TỰ ĐỘNG -->
-    <div id="questionsContainer"></div>
+    <div class="question-card" style="text-align:center" role="status">
+      <strong>Thời gian làm bài: 15 phút</strong>
+      <div id="countdown" style="font-size:32px;font-weight:700;color:#1e40af" aria-label="Thời gian còn lại">15:00</div>
+      <p id="timerNotice">Điền đủ thông tin rồi bấm Bắt đầu làm bài. Hết giờ, bài tự khóa và nộp.</p>
+      <button type="button" class="btn btn-submit" id="btnStart" onclick="startExam()">Bắt đầu làm bài</button>
+    </div>
+    <div id="questionsContainer" hidden></div>
 
     <!-- THANH NỘP BÀI -->
     <div class="controls">
       <div class="status-msg" id="statusDisplay">Vui lòng điền đủ thông tin trước khi nộp.</div>
-      <button type="button" class="btn btn-submit" id="btnSubmit" onclick="submitExam()">Nộp bài thi</button>
+      <button type="button" class="btn btn-submit" id="btnSubmit" disabled onclick="submitExam()">Nộp bài thi</button>
     </div>
   </form>
 </div>
@@ -149,7 +154,22 @@
   // DÁN LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFeYw3x-Uq4HqKXAqspSEOkfHhP7k_dWdRQnmleCH8emwGKaYwCsd9F1w-v0Eew25_NQ/exec";
  
-  const submissionId = crypto.randomUUID();
+  const STORAGE_KEY = 'tx1-timed-v3';
+  let savedSession = null;
+  try { savedSession = JSON.parse(sessionStorage.getItem(STORAGE_KEY)); } catch (_) {}
+  const submissionId = savedSession?.submissionId || crypto.randomUUID();
+  let deadline = savedSession?.deadline || null;
+  let frozenPayload = savedSession?.frozenPayload || null;
+  let submitted = savedSession?.submitted || false;
+  let sending = false;
+  let timerHandle;
+  function persistSession() {
+    const answers = {};
+    document.querySelectorAll('input[type="radio"]:checked').forEach(input => answers[input.name] = input.value);
+    const info = {};
+    ['hoTen','lop','stt'].forEach(id => info[id] = document.getElementById(id).value);
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({submissionId,deadline,frozenPayload,submitted,answers,info,snapshot:examSnapshot})); } catch (_) {}
+  }
 
   // Dữ liệu nội dung đề thi gốc (Hoàn toàn không có đáp án, an toàn bảo mật)
   const rawQuestions = [
@@ -274,12 +294,12 @@
     examSnapshot = [];
 
     // Trộn ngẫu nhiên thứ tự 10 câu hỏi
-    const shuffledQuestions = shuffle(rawQuestions);
+    const shuffledQuestions = savedSession?.snapshot ? savedSession.snapshot.map(q => ({id:q.questionId,header:q.header,items:q.items})) : shuffle(rawQuestions);
 
     shuffledQuestions.forEach((q, index) => {
       const qIndex = index + 1;
       // Trộn ngẫu nhiên thứ tự các ý phát biểu trong câu
-      const shuffledItems = shuffle(q.items);
+      const shuffledItems = savedSession?.snapshot ? q.items : shuffle(q.items);
       const labels = ['a', 'b', 'c', 'd'];
       examSnapshot.push({ questionId: q.id, header: q.header, items: shuffledItems.map(item => ({key: item.key, text: item.text})) });
 
@@ -318,76 +338,123 @@
     });
   }
 
-  // Tự động gọi trộn đề khi tải trang
   renderQuiz();
 
-  // Xử lý nộp bài
-  function submitExam() {
-    const hoTen = document.getElementById("hoTen").value.trim();
-    const lop = document.getElementById("lop").value.trim();
-    const stt = document.getElementById("stt").value.trim();
-
-    if (!hoTen || !lop || !stt) {
-      alert("Vui lòng điền đầy đủ Họ và tên, Lớp và Số thứ tự!");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
+  function lockAnswers() {
+    document.querySelectorAll('input').forEach(input => input.disabled = true);
+  }
+  function startExam() {
+    if (deadline || !document.getElementById('quizForm').reportValidity()) return;
+    if (!['hoTen','lop','stt'].every(id => document.getElementById(id).value.trim())) {
+      alert('Vui lòng điền đầy đủ thông tin.'); return;
     }
-
-    if (!document.getElementById("quizForm").reportValidity()) return;
-    if (!SCRIPT_URL.startsWith("https://script.google.com/macros/s/")) {
-      alert("Giáo viên chưa cấu hình đường dẫn nhận bài."); return;
+    deadline = Date.now() + 15 * 60 * 1000;
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('questionsContainer').hidden = false;
+    document.getElementById('btnStart').hidden = true;
+    document.getElementById('btnSubmit').disabled = false;
+    document.getElementById('statusDisplay').innerText = 'Đang làm bài';
+    persistSession();
+    tick();
+    timerHandle = setInterval(tick, 250);
+  }
+  function capturePayload(automatic) {
+    const answers = {};
+    for (let i=1;i<=10;i++) for (const key of ['a','b','c','d']) {
+      const name = 'q'+i+'_'+key;
+      const selected = document.querySelector('input[name="'+name+'"]:checked');
+      answers[name] = selected ? selected.value === 'true' : null;
     }
-    if (!confirm("Bạn có chắc chắn muốn nộp bài thi?")) return;
-
-    const btn = document.getElementById("btnSubmit");
-    const status = document.getElementById("statusDisplay");
-    btn.disabled = true;
-    status.innerText = "Đang gửi bài về hệ thống...";
-
-    // Thu thập kết quả theo mã gốc (q1_a, q1_b,...) để backend chấm chuẩn xác
-    const userAnswers = {};
-    const subKeys = ['a', 'b', 'c', 'd'];
-
-    for (let i = 1; i <= 10; i++) {
-      for (let j = 0; j < 4; j++) {
-        const fieldName = `q${i}_${subKeys[j]}`;
-        const selected = document.querySelector(`input[name="${fieldName}"]:checked`);
-        userAnswers[fieldName] = selected ? (selected.value === "true") : null;
-      }
-    }
-
-    const payload = {
-      submissionId: submissionId,
-      hoTen: hoTen,
-      lop: lop,
-      stt: stt,
-      answers: JSON.stringify(userAnswers),
-      examSnapshot: JSON.stringify(examSnapshot),
-      examVersion: "TX1-2026-10-04-v2"
+    return {
+      submissionId, hoTen:document.getElementById('hoTen').value.trim(),
+      lop:document.getElementById('lop').value.trim(), stt:document.getElementById('stt').value.trim(),
+      answers:JSON.stringify(answers),examSnapshot:JSON.stringify(examSnapshot),
+      examVersion:'TX1-2026-10-05-v3',
+      startedAt:new Date(deadline-15*60*1000).toISOString(),
+      endedAt:new Date(Math.min(Date.now(),deadline)).toISOString(),
+      submissionReason:automatic ? 'timeout' : 'manual'
     };
-
-    // Gửi dữ liệu và chỉ báo thành công khi nhận được xác nhận từ máy chủ
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(payload)
-    })
-    .then(async response => {
-      if (!response.ok) throw new Error("HTTP " + response.status);
+  }
+  function tick() {
+    if (!deadline || submitted) return;
+    const seconds = Math.max(0, Math.ceil((deadline-Date.now())/1000));
+    document.getElementById('countdown').innerText = String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+    if (seconds <= 60) document.getElementById('countdown').style.color = '#dc2626';
+    if (seconds === 0) {
+      clearInterval(timerHandle);
+      if (!frozenPayload) frozenPayload = capturePayload(true);
+      lockAnswers();
+      persistSession();
+      document.getElementById('timerNotice').innerText = 'Hết giờ. Bài đã khóa và đang tự nộp.';
+      if (!sending) submitExam(true);
+    }
+  }
+  async function submitExam(automatic = false) {
+    if (!deadline || submitted || sending) return;
+    const expired = Date.now() >= deadline;
+    if (!frozenPayload && !automatic && !expired && !confirm('Bạn có chắc chắn muốn nộp bài thi?')) return;
+    if (!frozenPayload) frozenPayload = capturePayload(automatic || expired || Date.now() >= deadline);
+    lockAnswers();
+    persistSession();
+    sending = true;
+    const btn = document.getElementById('btnSubmit');
+    const status = document.getElementById('statusDisplay');
+    btn.disabled = true;
+    status.innerText = 'Đang gửi bài về hệ thống...';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:new URLSearchParams(frozenPayload),signal:controller.signal
+      });
+      if (!response.ok) throw new Error('HTTP '+response.status);
       const result = await response.json();
-      if (result.ok !== true || result.submissionId !== submissionId) {
-        throw new Error(result.error || "Máy chủ chưa xác nhận lưu bài.");
-      }
-      status.innerText = "Đã lưu bài thành công!";
-      alert("Bài làm đã được lưu. Mã bài: " + submissionId);
-      document.querySelectorAll("input").forEach(input => input.disabled = true);
-    })
-    .catch(err => {
-      status.innerText = "Chưa xác nhận được bài đã lưu. Hãy thử nộp lại hoặc báo giáo viên.";
+      if (result.ok !== true || result.submissionId !== submissionId) throw new Error('Chưa xác nhận lưu bài');
+      submitted = true;
+      clearInterval(timerHandle);
+      persistSession();
+      status.innerText = 'Đã lưu bài thành công!';
+      document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
+      alert('Bài đã lưu thành công. Mã bài: '+submissionId);
+    } catch (err) {
+      status.innerText = 'Bài đã khóa. Chưa xác nhận lưu được; bấm Nộp lại khi có mạng.';
+      btn.innerText = 'Nộp lại bài đã khóa';
       btn.disabled = false;
-      console.error("Không xác nhận được bài nộp:", err);
-      alert("Chưa xác nhận được bài đã lưu. Giữ nguyên trang này và thử nộp lại. Mã bài: " + submissionId);
-    });
+      console.error(err);
+    } finally { clearTimeout(timeout); sending = false; }
+  }
+  document.getElementById('quizForm').addEventListener('change',persistSession);
+  document.getElementById('questionsContainer').addEventListener('pointerdown', () => {
+    if (deadline && Date.now() >= deadline) tick();
+  },true);
+  document.getElementById('questionsContainer').addEventListener('keydown', () => {
+    if (deadline && Date.now() >= deadline) tick();
+  },true);
+  window.addEventListener('online', () => { if (frozenPayload && !submitted) submitExam(true); });
+  document.addEventListener('visibilitychange',tick);
+  if (savedSession) {
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).value = savedSession.info?.[id] || '');
+    document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = savedSession.answers?.[input.name] === input.value);
+  }
+  if (deadline) {
+    document.getElementById('questionsContainer').hidden = false;
+    document.getElementById('btnStart').hidden = true;
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('btnSubmit').disabled = submitted;
+    if (frozenPayload || submitted) lockAnswers();
+    if (submitted) {
+      document.getElementById('statusDisplay').innerText = 'Đã lưu bài thành công!';
+      document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
+    } else if (frozenPayload) {
+      document.getElementById('btnSubmit').innerText = 'Nộp lại bài đã khóa';
+      submitExam(true);
+    } else {
+      tick();
+      if (!frozenPayload) timerHandle = setInterval(tick,250);
+    }
+  } else {
+    alert('Thời gian làm bài 15 phút. Điền thông tin rồi bấm Bắt đầu làm bài. Hết giờ, bài tự khóa và nộp tự động.');
   }
 </script>
 </body>
