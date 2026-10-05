@@ -1,115 +1,531 @@
-// Chỉ lưu mã này trong Apps Script; không đưa lên kho GitHub công khai.
-const SHEET_ID = '1Ov6QMRMwv7ndwGTlQKFObAVNcE_TJFcAhwXDtIcDDFk';
-const SHEET_NAME = 'BaiLam';
-// Giữ cách tính hiện tại; đổi 0.24 thành 0.25 nếu giáo viên chọn.
-const SCORE_BY_CORRECT = [0, 0.24, 0.5, 0.75, 1];
-const ANSWERS = {
-  1: [true,true,false,true], 2: [true,false,true,false],
-  3: [true,false,true,true], 4: [true,false,true,true],
-  5: [true,true,true,false], 6: [true,false,true,false],
-  7: [true,false,true,false], 8: [true,false,true,false],
-  9: [true,false,true,true], 10: [true,false,true,true]
-};
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm tra thường xuyên 1 - Tin học 12</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --text: #1f2937;
+      --border: #e5e7eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px 12px;
+    }
+    .container { max-width: 860px; margin: 0 auto; }
+    header {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      text-align: center;
+      border-top: 5px solid var(--primary);
+    }
+    header h2 { font-size: 14px; color: #4b5563; text-transform: uppercase; }
+    header h1 { font-size: 20px; color: var(--primary); margin: 6px 0; }
+    header p { font-size: 13.5px; color: #6b7280; }
+    
+    .student-info-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13.5px;
+      margin-bottom: 5px;
+      color: #1e3a8a;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14.5px;
+      outline: none;
+    }
+    .input-group input:focus { border-color: var(--primary); }
 
-function jsonResponse(value) {
-  return ContentService.createTextOutput(JSON.stringify(value))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+    .question-card {
+      background: var(--card-bg);
+      padding: 18px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+    }
+    .q-header { font-weight: 700; color: #111827; margin-bottom: 10px; font-size: 15px; text-align: justify; }
+    .options-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .options-table th, .options-table td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .options-table th { background: #f9fafb; font-weight: 600; text-align: center; }
+    .statement { width: 78%; text-align: justify; }
+    .col-choice { width: 11%; text-align: center; }
+    .col-choice input { width: 17px; height: 17px; cursor: pointer; }
 
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  try {
-    const p = e && e.parameter;
-    if (!p || !p.hoTen || !p.lop || !/^\d+$/.test(p.stt || '') ||
-        Number(p.stt) < 1 || Number(p.stt) > 60 ||
-        !/^[0-9a-f-]{36}$/i.test(p.submissionId || '')) {
-      throw new Error('Thông tin bài nộp không hợp lệ.');
+    .controls {
+      position: sticky;
+      bottom: 20px;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      border: 1px solid var(--border);
+      z-index: 100;
     }
-    const answers = JSON.parse(p.answers);
-    if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
-      throw new Error('Dữ liệu đáp án không hợp lệ.');
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 15px;
     }
-    let score = 0, totalCorrect = 0;
-    const details = [];
-    for (let i = 1; i <= 10; i++) {
-      let correct = 0;
-      const choices = [];
-      ['a','b','c','d'].forEach((key, j) => {
-        const value = answers['q' + i + '_' + key];
-        if (value !== true && value !== false && value !== null) {
-          throw new Error('Thiếu hoặc sai định dạng đáp án.');
-        }
-        if (value === ANSWERS[i][j]) { correct++; totalCorrect++; }
-        choices.push(key + ':' + (value === true ? 'Đ' : value === false ? 'S' : '_'));
-      });
-      score += SCORE_BY_CORRECT[correct];
-      details.push('C' + i + '[' + choices.join(',') + ']');
+    .btn-submit { background: var(--primary); color: white; }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    .status-msg { font-size: 14px; font-weight: 600; color: var(--primary); }
+    #noticeDialog {
+      width: min(520px, calc(100% - 32px));
+      margin: auto;
+      padding: 26px;
+      border: 3px solid #dc2626;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      text-align: center;
     }
-    // Cho phép trang cũ tiếp tục nộp; trang mới phải có ảnh chụp đề đầy đủ.
-    const snapshot = p.examSnapshot ? JSON.parse(p.examSnapshot) : null;
-    let layout = '', displayed = '', snapshotJson = '';
-    if (snapshot) {
-      if (!Array.isArray(snapshot) || snapshot.length !== 10) throw new Error('Đề lưu không hợp lệ.');
-      const ids = new Set();
-      const layoutParts = [], displayedParts = [];
-      snapshot.forEach((q, index) => {
-        if (!Number.isInteger(q.questionId) || q.questionId < 1 || q.questionId > 10 || ids.has(q.questionId) ||
-            typeof q.header !== 'string' || !Array.isArray(q.items) || q.items.length !== 4) throw new Error('Sai thứ tự đề.');
-        ids.add(q.questionId);
-        const keys = new Set();
-        const mapping = [], choices = [];
-        q.items.forEach((item, j) => {
-          if (!item || !['a','b','c','d'].includes(item.key) || keys.has(item.key) || typeof item.text !== 'string') throw new Error('Sai thứ tự ý.');
-          keys.add(item.key);
-          const label = 'abcd'[j];
-          const value = answers['q' + q.questionId + '_' + item.key];
-          mapping.push(label + '→' + item.key);
-          choices.push(label + ':' + (value === true ? 'Đ' : value === false ? 'S' : '_'));
-        });
-        layoutParts.push('Câu ' + (index+1) + '→C' + q.questionId + '[' + mapping.join(',') + ']');
-        displayedParts.push('Câu ' + (index+1) + '[' + choices.join(',') + ']');
-      });
-      layout = layoutParts.join(' | ');
-      displayed = displayedParts.join(' | ');
-      snapshotJson = JSON.stringify({version: p.examVersion || '', questions: snapshot});
-      if (snapshotJson.length > 45000) throw new Error('Nội dung đề vượt giới hạn lưu.');
-    }
-    const monitor = p.monitoring ? JSON.parse(p.monitoring) : null;
-    if (monitor && (!Number.isSafeInteger(monitor.hiddenCount) || monitor.hiddenCount < 0 ||
-        !Number.isSafeInteger(monitor.fullscreenExitCount) || monitor.fullscreenExitCount < 0 ||
-        !Array.isArray(monitor.events) || monitor.events.length > 200 ||
-        monitor.events.some(event => !event || !['page_hidden','fullscreen_exit','fullscreen_unsupported','fullscreen_unavailable'].includes(event.type) ||
-          typeof event.time !== 'string' || !Number.isFinite(Date.parse(event.time))))) {
-      throw new Error('Dữ liệu giám sát không hợp lệ.');
-    }
-    const monitorJson = monitor ? JSON.stringify(monitor.events) : '';
-    if (monitorJson.length > 45000) throw new Error('Nhật ký vượt giới hạn.');
-    const gradingSnapshot = JSON.stringify({answers: ANSWERS, scoreByCorrect: SCORE_BY_CORRECT});
-    lock.waitLock(30000);
-    const book = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = book.getSheetByName(SHEET_NAME) || book.insertSheet(SHEET_NAME);
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Thời gian nộp','Họ và tên','Lớp','STT','Điểm','Số ý đúng','Chi tiết theo mã gốc','Mã bài']);
-    }
-    // Chỉ thêm tiêu đề cột mới; giữ nguyên dữ liệu và cột A:H hiện có.
-    sheet.getRange(1,9,1,4).setValues([['Thứ tự đề hiển thị','Lựa chọn theo đề hiển thị','Nội dung đề lúc nộp (JSON)','Đáp án và thang điểm lúc chấm (JSON)']]);
-    sheet.getRange(1,13,1,3).setValues([['Số lần trang bị ẩn','Số lần thoát toàn màn hình','Nhật ký giám sát (JSON)']]);
-    if (sheet.getLastRow() > 1) {
-      const existing = sheet.getRange(2,8,sheet.getLastRow()-1,1)
-        .createTextFinder(p.submissionId).matchEntireCell(true).findNext();
-      if (existing) return jsonResponse({ok:true,submissionId:p.submissionId,duplicate:true});
-    }
-    // Giữ chuỗi người dùng dưới dạng văn bản, tránh bị diễn giải thành công thức.
-    const text = value => /^[=+@-]/.test(value.trim()) ? "'" + value.trim() : value.trim();
-    sheet.appendRow([new Date(),text(p.hoTen),text(p.lop),Number(p.stt),
-      Number(score.toFixed(2)),totalCorrect + '/40',details.join(' | '),p.submissionId,layout,displayed,snapshotJson,gradingSnapshot,monitor ? monitor.hiddenCount : '',monitor ? monitor.fullscreenExitCount : '',monitorJson]);
-    SpreadsheetApp.flush();
-    return jsonResponse({ok:true,submissionId:p.submissionId});
-  } catch (err) {
-    console.error(err);
-    return jsonResponse({ok:false,error:'Không lưu được bài. Hãy kiểm tra cấu hình hoặc thử lại.'});
-  } finally {
-    if (lock.hasLock()) lock.releaseLock();
+    #noticeDialog::backdrop { background: rgba(0,0,0,.55); }
+    #noticeTitle { color: #b91c1c; font-size: 22px; font-weight: 800; }
+    #noticeMessage { color: #b91c1c; font-size: 18px; font-weight: 700; line-height: 1.6; margin: 16px 0 22px; white-space: pre-line; }
+    #noticeDialog .btn { background: #b91c1c; color: white; }
+    #noticeDialog .btn:focus-visible { outline: 3px solid #1e40af; outline-offset: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+       <h1>KIỂM TRA THƯỜNG XUYÊN 1 — MÔN TIN HỌC 12</h1>
+    <p>Thời gian làm bài: 15 phút (Đề gồm 10 câu trắc nghiệm Đúng / Sai — Trộn ngẫu nhiên câu và ý)</p>
+  </header>
+
+  <form id="quizForm">
+    <!-- KHUNG ĐIỀN THÔNG TIN HỌC SINH -->
+    <div class="student-info-card">
+      <div class="input-group">
+        <label for="hoTen">Họ và tên học sinh (*):</label>
+        <input type="text" id="hoTen" required placeholder="Ví dụ: Nguyễn Văn A">
+      </div>
+      <div class="input-group">
+        <label for="lop">Lớp (*):</label>
+        <input type="text" id="lop" required placeholder="Ví dụ: 12A1">
+      </div>
+      <div class="input-group">
+        <label for="stt">Số thứ tự (STT) trong sổ điểm (*):</label>
+        <input type="number" id="stt" required min="1" max="60" placeholder="Ví dụ: 05">
+      </div>
+    </div>
+
+    <!-- KHUNG CHỨA CÁC CÂU HỎI TRỘN TỰ ĐỘNG -->
+    <div class="question-card" style="text-align:center" role="status">
+      <strong>Thời gian làm bài: 15 phút</strong>
+      <div id="countdown" style="font-size:32px;font-weight:700;color:#1e40af" aria-label="Thời gian còn lại">15:00</div>
+      <p id="timerNotice">Điền đủ thông tin rồi bấm Bắt đầu làm bài. Hết giờ, bài tự khóa và nộp. Khi bắt đầu, trang yêu cầu toàn màn hình; số lần trang bị ẩn và thoát toàn màn hình được ghi nhận.</p>
+      <button type="button" class="btn btn-submit" id="btnStart" onclick="startExam()">Bắt đầu làm bài</button>
+    </div>
+    <div id="questionsContainer" hidden></div>
+
+    <!-- THANH NỘP BÀI -->
+    <div class="controls">
+      <div class="status-msg" id="statusDisplay">Vui lòng điền đủ thông tin trước khi nộp.</div>
+      <button type="button" class="btn btn-submit" id="btnSubmit" disabled onclick="submitExam()">Nộp bài thi</button>
+    </div>
+  </form>
+</div>
+
+<dialog id="noticeDialog" aria-labelledby="noticeTitle" aria-describedby="noticeMessage">
+  <h2 id="noticeTitle">THÔNG BÁO</h2>
+  <p id="noticeMessage"></p>
+  <form method="dialog"><button class="btn" autofocus>Đã hiểu</button></form>
+</dialog>
+<script>
+  function showNotice(message) {
+    const dialog = document.getElementById('noticeDialog');
+    document.getElementById('noticeMessage').textContent = message;
+    if (!dialog.open) dialog.showModal();
   }
-}
 
+  // DÁN LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFeYw3x-Uq4HqKXAqspSEOkfHhP7k_dWdRQnmleCH8emwGKaYwCsd9F1w-v0Eew25_NQ/exec";
+ 
+  const STORAGE_KEY = 'tx1-timed-v3';
+  let savedSession = null;
+  try { savedSession = JSON.parse(sessionStorage.getItem(STORAGE_KEY)); } catch (_) {}
+  const submissionId = savedSession?.submissionId || crypto.randomUUID();
+  let deadline = savedSession?.deadline || null;
+  let frozenPayload = savedSession?.frozenPayload || null;
+  let submitted = savedSession?.submitted || false;
+  let sending = false;
+  let monitoring = savedSession?.monitoring || {hiddenCount:0, fullscreenExitCount:0, events:[]};
+  let returnWarning = false;
+  let fullscreenWasActive = false;
+  function recordMonitor(type) {
+    if (!deadline || submitted || frozenPayload || Date.now() >= deadline) return;
+    if (type === 'page_hidden') monitoring.hiddenCount++;
+    if (type === 'fullscreen_exit') monitoring.fullscreenExitCount++;
+    // Giới hạn nhật ký để không vượt dung lượng một ô Sheets.
+    if (monitoring.events.length < 200) monitoring.events.push({type,time:new Date().toISOString()});
+    returnWarning = true;
+    persistSession();
+  }
+  let timerHandle;
+  function persistSession() {
+    const answers = {};
+    document.querySelectorAll('input[type="radio"]:checked').forEach(input => answers[input.name] = input.value);
+    const info = {};
+    ['hoTen','lop','stt'].forEach(id => info[id] = document.getElementById(id).value);
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({submissionId,deadline,frozenPayload,submitted,answers,info,snapshot:examSnapshot,monitoring})); } catch (_) {}
+  }
+
+  // Dữ liệu nội dung đề thi gốc (Hoàn toàn không có đáp án, an toàn bảo mật)
+  const rawQuestions = [
+    {
+      id: 1,
+      header: "Nhìn bên ngoài, rất khó phân biệt được switch và hub do cùng có các cổng cắm cáp mạng. Tuy nhiên, điểm khác nhau cơ bản nằm ở cách thức hoạt động: khi máy tính gửi dữ liệu qua một cổng của hub, tín hiệu được phát tán đến tất cả các cổng còn lại. Trong khi đó, switch xác định chính xác cổng của thiết bị nhận, thiết lập tạm thời kênh truyền riêng và hủy kết nối sau khi truyền xong.",
+      items: [
+        { key: 'a', text: "Hub hoạt động theo cơ chế phát tán tín hiệu nhận được từ một cổng ra tất cả các cổng còn lại của thiết bị." },
+        { key: 'b', text: "Do switch tạo kênh truyền riêng giữa hai cổng gửi và nhận nên nó giảm thiểu triệt để hiện tượng xung đột dữ liệu so với hub." },
+        { key: 'c', text: "Trong một phòng máy tính gồm 40 máy thường xuyên truyền tệp dung lượng lớn, việc thay thế switch bằng hub sẽ giúp tăng tốc độ truyền mạng và tiết kiệm điện năng." },
+        { key: 'd', text: "Nếu kẻ xấu cắm một máy tính vào cổng còn trống của Hub trong mạng LAN nội bộ, kẻ đó có thể thu thập toàn bộ gói tin đang truyền giữa hai máy tính khác trong mạng đó mà không cần can thiệp phức tạp." }
+      ]
+    },
+    {
+      id: 2,
+      header: "Wi-Fi là bộ tiêu chuẩn kĩ thuật truyền dữ liệu bằng sóng vô tuyến điện được sử dụng rộng rãi trong mạng cục bộ. Điểm truy cập không dây (Wireless Access Point - WAP) cho phép các thiết bị đầu cuối hỗ trợ Wi-Fi kết nối vào mạng LAN mà không cần dây cáp mạng phức tạp.",
+      items: [
+        { key: 'a', text: "Wi-Fi là chữ viết tắt của Wireless Fidelity, sử dụng sóng vô tuyến điện để truyền dữ liệu trong mạng cục bộ." },
+        { key: 'b', text: "WAP chỉ có thể hoạt động độc lập để tạo ra một mạng LAN không dây mới mà hoàn toàn không thể nối vào mạng LAN có dây sẵn có." },
+        { key: 'c', text: "Để kết nối một máy tính để bàn cũ (không tích hợp card Wi-Fi) vào mạng không dây của trường học thông qua WAP, người quản trị cần lắp thêm bảng mạch hoặc bộ chuyển đổi Wi-Fi cho máy tính đó." },
+        { key: 'd', text: "Trong một văn phòng có 100 nhân viên sử dụng laptop kết nối Wi-Fi, việc bố trí duy nhất một trạm WAP dân dụng đặt tại góc tường khuất là giải pháp tối ưu đảm bảo băng thông và độ ổn định cao nhất." }
+      ]
+    },
+    {
+      id: 3,
+      header: "Router của các nhà mạng hoặc tổ chức lớn có nhiều cổng WAN và thực hiện thuật toán định tuyến phức tạp. Ngược lại, router sử dụng trong các gia đình thường chỉ có một cổng WAN kết nối đến nhà cung cấp dịch vụ Internet (ISP) và được tích hợp sẵn cả bộ thu phát Wi-Fi cùng switch thu nhỏ (gọi là Router Wi-Fi).",
+      items: [
+        { key: 'a', text: "Router gia đình thường có 1 cổng WAN và được tích hợp bộ thu phát Wi-Fi nên được gọi là router Wi-Fi." },
+        { key: 'b', text: "Router Wi-Fi gia đình chỉ có duy nhất chức năng phát sóng vô tuyến, hoàn toàn không có khả năng cấp cổng kết nối mạng có dây." },
+        { key: 'c', text: "Khi kết nối Internet cho gia đình, dây cáp từ modem quang của nhà mạng ISP phải được cắm vào cổng WAN của router Wi-Fi để cấp mạng cho toàn bộ gia đình." },
+        { key: 'd', text: "Do router gia đình chỉ có một cổng WAN nên gói tin đi ra Internet từ các máy tính nội bộ không cần thuật toán chọn đường giữa nhiều cổng WAN như ở router đường trục ISP của nhà mạng." }
+      ]
+    },
+    {
+      id: 4,
+      header: "Các mạng LAN thông thường sử dụng cáp mạng UTP gồm bốn đôi dây xoắn với giắc cắm chuẩn RJ45 để kết nối giữa máy tính với switch, hub hoặc cổng LAN của router. Việc cắm đúng cáp mạng vào cổng RJ45 mới chỉ hoàn tất kết nối vật lí; để trao đổi dữ liệu, hệ thống còn cần thiết lập các thông số kết nối logic.",
+      items: [
+        { key: 'a', text: "Cáp mạng UTP thông dụng trong mạng LAN gồm có 4 đôi dây xoắn và sử dụng đầu nối chuẩn RJ45." },
+        { key: 'b', text: "Khi cắm một đầu cáp RJ45 vào máy tính và đầu kia vào switch thì máy tính lập tức tự động lướt web trên Internet mà không cần bất kì thiết lập logic hay cấu hình IP nào." },
+        { key: 'c', text: "Khi bấm đầu mạng chuẩn RJ45, nếu các sợi dây bên trong bị đảo lộn không đúng theo quy chuẩn chân truyền/nhận tín hiệu thì kết nối mạng vật lí giữa máy tính và switch sẽ bị lỗi hoặc không nhận diện được." },
+        { key: 'd', text: "Trong phòng máy tính của trường học, việc ưu tiên sử dụng cáp UTP nối trực tiếp từ switch đến từng máy tính thay vì dùng toàn bộ Wi-Fi giúp đảm bảo tốc độ ổn định cao, giảm độ trễ và tránh can nhiễu sóng khi cả lớp cùng tải dữ liệu." }
+      ]
+    },
+    {
+      id: 5,
+      header: "Quy trình kết nối thiết bị di động hoặc máy tính vào mạng Wi-Fi gồm: tìm trạm thu phát Wi-Fi (WAP) trong danh sách hiển thị, kiểm tra trạng thái bảo mật của trạm, chọn tên trạm (SSID), nhập mật khẩu chính xác nếu có biểu tượng ổ khóa, và tùy chọn kích hoạt chế độ 'Tự động kết nối lại'.",
+      items: [
+        { key: 'a', text: "Biểu tượng hình ổ khóa cạnh tên mạng Wi-Fi cho biết mạng đó được thiết lập chế độ bảo mật và người dùng phải nhập đúng mật khẩu để truy cập." },
+        { key: 'b', text: "Khi đánh dấu chọn mục 'Connect automatically' (hoặc 'Tự động kết nối lại'), thiết bị sẽ tự động kết nối với mạng Wi-Fi đó ở các lần sau mà không cần hỏi lại mật khẩu." },
+        { key: 'c', text: "Trên hệ điều hành di động iOS, người dùng có thể chia sẻ mật khẩu Wi-Fi đã lưu cho một thiết bị Apple khác ở gần mà không cần trực tiếp nhập từng kí tự mật khẩu bằng tay." },
+        { key: 'd', text: "Một người lạ mang laptop đến quán cà phê có thể truy cập thành công vào mạng Wi-Fi có mật khẩu mạnh mà không cần mật khẩu, chỉ bằng cách đặt laptop thật gần bộ phát Wi-Fi." }
+      ]
+    },
+    {
+      id: 6,
+      header: "Tập hợp các quy định về cách thức giao tiếp để truyền nhận dữ liệu giữa các đối tượng tham gia mạng gọi là giao thức mạng (network protocol). Tất cả các hoạt động truyền thông trên mạng đều cần có giao thức giúp việc gửi, nhận dữ liệu được thực hiện chính xác, tin cậy và hiệu quả.",
+      items: [
+        { key: 'a', text: "Giao thức mạng là tập hợp các quy tắc, quy định về cách thức giao tiếp và truyền nhận dữ liệu qua mạng." },
+        { key: 'b', text: "Giao thức mạng chỉ quy định về mức giá cước viễn thông và thủ tục đóng tiền thuê bao Internet của khách hàng." },
+        { key: 'c', text: "Trong hệ thống gửi nhận thư điện tử, giao thức SMTP đảm nhận quy định gửi thư từ máy người gửi đến máy chủ, còn POP3 hoặc IMAP quy định cách nhận và tải thư về máy người nhận." },
+        { key: 'd', text: "Nếu hai máy tính kết nối mạng với nhau nhưng một bên sử dụng quy tắc đóng gói dữ liệu hoàn toàn khác với bên kia, hai máy vẫn giao tiếp được vì tín hiệu điện trên dây cáp là tương đương." }
+      ]
+    },
+    {
+      id: 7,
+      header: "Giao thức IP có hai nội dung chính là cách đánh địa chỉ và định tuyến để dẫn dữ liệu từ LAN của máy gửi đến LAN của máy nhận. Mỗi địa chỉ IPv4 gồm 4 byte (32 bit), thường được biểu diễn dưới dạng bốn số thập phân ngăn cách bởi dấu chấm (dot decimal notation).",
+      items: [
+        { key: 'a', text: "Địa chỉ IPv4 gồm có 4 byte (tương ứng với 32 bit nhị phân)." },
+        { key: 'b', text: "Trong cách viết dot decimal của IPv4, giá trị của mỗi byte trong chuỗi có thể nằm trong khoảng từ 0 đến 512." },
+        { key: 'c', text: "Chuỗi nhị phân 11000000 10101000 00000001 00000011 được biểu diễn chính xác ở dạng thập phân là 192.168.1.3." },
+        { key: 'd', text: "Địa chỉ '192.168.1.300' là một địa chỉ IPv4 hoàn toàn hợp lệ để gán cho máy tính trong mạng phòng thực hành." }
+      ]
+    },
+    {
+      id: 8,
+      header: "Gói tin gửi đi trên Internet luôn chứa địa chỉ IP của máy gửi và máy nhận. Tuy nhiên, khi gói tin chuyển trên đường truyền vật lí nội bộ, nó cần được gán địa chỉ MAC của thiết bị nhận. Mạng có giao thức hỗ trợ lấy địa chỉ MAC theo địa chỉ IP. Nếu IP máy nhận nằm ngoài LAN, gói tin sẽ được gửi đến địa chỉ MAC của router để chuyển ra ngoài.",
+      items: [
+        { key: 'a', text: "Trên đường truyền vật lí của mạng, máy tính nhận dạng và chấp nhận gói tin dựa vào địa chỉ MAC của nó." },
+        { key: 'b', text: "Địa chỉ IP và địa chỉ MAC là một, đều được nhà sản xuất nạp cố định vào chip nhớ của card mạng và không thể thay đổi bằng phần mềm." },
+        { key: 'c', text: "Khi máy tính A gửi dữ liệu cho máy tính B nằm ở mạng LAN khác trên thế giới, ở chặng xuất phát đầu tiên, máy A sẽ đóng gói dữ liệu kèm địa chỉ IP của máy B nhưng mang địa chỉ MAC đích là card mạng của router phòng mình." },
+        { key: 'd', text: "Người dùng có thể mang laptop kết nối vào bất kì mạng Wi-Fi công cộng nào mà không bao giờ bị thay đổi địa chỉ IP cục bộ được cấp phát." }
+      ]
+    },
+    {
+      id: 9,
+      header: "Bên cạnh bộ giao thức nền tảng TCP/IP, trên Internet còn có nhiều giao thức ứng dụng phổ biến khác như HTTP/HTTPS (truyền tải siêu văn bản cho các trang web) hay giao thức DNS (Domain Name System) giúp chuyển đổi giữa tên miền bằng chữ dễ nhớ và địa chỉ IP của máy chủ.",
+      items: [
+        { key: 'a', text: "Giao thức DNS cho phép sử dụng hệ thống tên bằng chữ (tên miền) thay thế cho các địa chỉ IP dạng số khó nhớ." },
+        { key: 'b', text: "Giao thức HTTP là giao thức chuyên trách dùng để chuyển đổi địa chỉ IP số thành địa chỉ MAC phần cứng của máy chủ." },
+        { key: 'c', text: "Khi nhập địa chỉ 'moet.edu.vn' vào thanh địa chỉ của trình duyệt, dịch vụ DNS sẽ được kích hoạt để tra cứu và tìm ra địa chỉ IP tương ứng của máy chủ Bộ Giáo dục và Đào tạo." },
+        { key: 'd', text: "Nếu máy chủ DNS gặp sự cố ngừng hoạt động hoàn toàn, người dùng vẫn có thể truy cập trực tiếp trang web của máy chủ nếu biết chính xác địa chỉ IP của máy chủ đó." }
+      ]
+    },
+    {
+      id: 10,
+      header: "Lệnh 'ping' trong các hệ điều hành là một tiện ích dòng lệnh dựa trên giao thức ICMP (Internet Control Message Protocol). Lệnh này gửi các gói tin thăm dò đến một địa chỉ IP hoặc tên miền mục tiêu và chờ phản hồi để kiểm tra khả năng kết nối mạng cũng như đo lường thời gian trễ của đường truyền.",
+      items: [
+        { key: 'a', text: "Lệnh ping được sử dụng để kiểm tra máy tính có kết nối được với một thiết bị mạng hoặc máy tính khác hay không." },
+        { key: 'b', text: "Lệnh ping hoạt động dựa trên giao thức truyền thư điện tử SMTP của máy chủ bưu chính." },
+        { key: 'c', text: "Khi thực hiện lệnh ping đến địa chỉ router mặc định (Default Gateway) mà nhận được phản hồi 'Request timed out', điều này chứng tỏ kết nối từ máy tính tới router đang bị gián đoạn." },
+        { key: 'd', text: "Nếu một máy tính ping thành công đến địa chỉ IP '8.8.8.8' (máy chủ Google) với thời gian trễ 15ms nhưng không vào được trang web bằng tên miền 'google.com', nguyên nhân có thể do cấu hình DNS của máy tính đang gặp lỗi." }
+      ]
+    }
+  ];
+
+  // Hàm xáo trộn mảng ngẫu nhiên (Fisher-Yates)
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let examSnapshot = [];
+
+  // Khởi tạo hiển thị đề thi với thứ tự ngẫu nhiên
+  function renderQuiz() {
+    const container = document.getElementById("questionsContainer");
+    container.innerHTML = "";
+    examSnapshot = [];
+
+    // Trộn ngẫu nhiên thứ tự 10 câu hỏi
+    const shuffledQuestions = savedSession?.snapshot ? savedSession.snapshot.map(q => ({id:q.questionId,header:q.header,items:q.items})) : shuffle(rawQuestions);
+
+    shuffledQuestions.forEach((q, index) => {
+      const qIndex = index + 1;
+      // Trộn ngẫu nhiên thứ tự các ý phát biểu trong câu
+      const shuffledItems = savedSession?.snapshot ? q.items : shuffle(q.items);
+      const labels = ['a', 'b', 'c', 'd'];
+      examSnapshot.push({ questionId: q.id, header: q.header, items: shuffledItems.map(item => ({key: item.key, text: item.text})) });
+
+      let rowsHtml = "";
+      shuffledItems.forEach((item, itemIdx) => {
+        const inputName = `q${q.id}_${item.key}`;
+        rowsHtml += `
+          <tr>
+            <td style="font-weight:600; text-align:center;">${labels[itemIdx]}</td>
+            <td class="statement">${item.text}</td>
+            <td class="col-choice"><input type="radio" name="${inputName}" value="true"></td>
+            <td class="col-choice"><input type="radio" name="${inputName}" value="false"></td>
+          </tr>
+        `;
+      });
+
+      const card = document.createElement("div");
+      card.className = "question-card";
+      card.innerHTML = `
+        <div class="q-header">Câu ${qIndex}: ${q.header}</div>
+        <table class="options-table">
+          <thead>
+            <tr>
+              <th style="width: 7%;">Ý</th>
+              <th style="width: 71%;">Nội dung phát biểu</th>
+              <th class="col-choice">Đúng</th>
+              <th class="col-choice">Sai</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  renderQuiz();
+
+  function lockAnswers() {
+    document.querySelectorAll('input').forEach(input => input.disabled = true);
+  }
+  async function startExam() {
+    if (deadline || !document.getElementById('quizForm').reportValidity()) return;
+    if (!['hoTen','lop','stt'].every(id => document.getElementById(id).value.trim())) {
+      showNotice('Vui lòng điền đầy đủ thông tin.'); return;
+    }
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+        fullscreenWasActive = !!document.fullscreenElement;
+      } else {
+        monitoring.events.push({type:'fullscreen_unsupported',time:new Date().toISOString()});
+      }
+    } catch (_) {
+      monitoring.events.push({type:'fullscreen_unavailable',time:new Date().toISOString()});
+      showNotice('Không bật được toàn màn hình. Bạn vẫn có thể làm bài; trạng thái này được ghi nhận.');
+    }
+    deadline = Date.now() + 15 * 60 * 1000;
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('questionsContainer').hidden = false;
+    document.getElementById('btnStart').hidden = true;
+    document.getElementById('btnSubmit').disabled = false;
+    document.getElementById('statusDisplay').innerText = 'Đang làm bài';
+    persistSession();
+    tick();
+    timerHandle = setInterval(tick, 250);
+  }
+  function capturePayload(automatic) {
+    const answers = {};
+    for (let i=1;i<=10;i++) for (const key of ['a','b','c','d']) {
+      const name = 'q'+i+'_'+key;
+      const selected = document.querySelector('input[name="'+name+'"]:checked');
+      answers[name] = selected ? selected.value === 'true' : null;
+    }
+    return {
+      submissionId, hoTen:document.getElementById('hoTen').value.trim(),
+      lop:document.getElementById('lop').value.trim(), stt:document.getElementById('stt').value.trim(),
+      answers:JSON.stringify(answers),examSnapshot:JSON.stringify(examSnapshot),
+      examVersion:'TX1-2026-10-05-v3',
+      startedAt:new Date(deadline-15*60*1000).toISOString(),
+      endedAt:new Date(Math.min(Date.now(),deadline)).toISOString(),
+      submissionReason:automatic ? 'timeout' : 'manual',
+      monitoring:JSON.stringify(monitoring)
+    };
+  }
+  function tick() {
+    if (!deadline || submitted) return;
+    const seconds = Math.max(0, Math.ceil((deadline-Date.now())/1000));
+    document.getElementById('countdown').innerText = String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+    if (seconds <= 60) document.getElementById('countdown').style.color = '#dc2626';
+    if (seconds === 0) {
+      clearInterval(timerHandle);
+      if (!frozenPayload) frozenPayload = capturePayload(true);
+      lockAnswers();
+      persistSession();
+      document.getElementById('timerNotice').innerText = 'Hết giờ. Bài đã khóa và đang tự nộp.';
+      if (!sending) submitExam(true);
+    }
+  }
+  async function submitExam(automatic = false) {
+    if (!deadline || submitted || sending) return;
+    const expired = Date.now() >= deadline;
+    if (!frozenPayload && !automatic && !expired && !confirm('Bạn có chắc chắn muốn nộp bài thi?')) return;
+    if (!frozenPayload) frozenPayload = capturePayload(automatic || expired || Date.now() >= deadline);
+    lockAnswers();
+    persistSession();
+    sending = true;
+    const btn = document.getElementById('btnSubmit');
+    const status = document.getElementById('statusDisplay');
+    btn.disabled = true;
+    status.innerText = 'Đang gửi bài về hệ thống...';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:new URLSearchParams(frozenPayload),signal:controller.signal
+      });
+      if (!response.ok) throw new Error('HTTP '+response.status);
+      const result = await response.json();
+      if (result.ok !== true || result.submissionId !== submissionId) throw new Error('Chưa xác nhận lưu bài');
+      submitted = true;
+      clearInterval(timerHandle);
+      persistSession();
+      status.innerText = 'Đã lưu bài thành công!';
+      document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
+      showNotice('Bài đã lưu thành công. Mã bài: '+submissionId);
+    } catch (err) {
+      status.innerText = 'Bài đã khóa. Chưa xác nhận lưu được; bấm Nộp lại khi có mạng.';
+      btn.innerText = 'Nộp lại bài đã khóa';
+      btn.disabled = false;
+      console.error(err);
+    } finally { clearTimeout(timeout); sending = false; }
+  }
+  document.getElementById('quizForm').addEventListener('change',persistSession);
+  document.getElementById('questionsContainer').addEventListener('pointerdown', () => {
+    if (deadline && Date.now() >= deadline) tick();
+  },true);
+  document.getElementById('questionsContainer').addEventListener('keydown', () => {
+    if (deadline && Date.now() >= deadline) tick();
+  },true);
+  window.addEventListener('online', () => { if (frozenPayload && !submitted) submitExam(true); });
+  document.addEventListener('visibilitychange', () => {
+    tick();
+    if (document.hidden) {
+      recordMonitor('page_hidden');
+    } else if (returnWarning && !submitted && !frozenPayload) {
+      returnWarning = false;
+      showNotice('Trang bài thi đã bị ẩn hoặc đã thoát toàn màn hình. Số lần được ghi nhận để giáo viên xem. Hãy tiếp tục làm bài.');
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+      fullscreenWasActive = true;
+    } else if (fullscreenWasActive) {
+      fullscreenWasActive = false;
+      recordMonitor('fullscreen_exit');
+      if (!document.hidden && deadline && !submitted && !frozenPayload && Date.now() < deadline) {
+        returnWarning = false;
+        showNotice('Bạn đã thoát toàn màn hình. Lần thoát này được ghi nhận.');
+      }
+    }
+  });
+  if (savedSession) {
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).value = savedSession.info?.[id] || '');
+    document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = savedSession.answers?.[input.name] === input.value);
+  }
+  if (deadline) {
+    document.getElementById('questionsContainer').hidden = false;
+    document.getElementById('btnStart').hidden = true;
+    ['hoTen','lop','stt'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('btnSubmit').disabled = submitted;
+    if (frozenPayload || submitted) lockAnswers();
+    if (submitted) {
+      document.getElementById('statusDisplay').innerText = 'Đã lưu bài thành công!';
+      document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
+    } else if (frozenPayload) {
+      document.getElementById('btnSubmit').innerText = 'Nộp lại bài đã khóa';
+      submitExam(true);
+    } else {
+      tick();
+      if (!frozenPayload) timerHandle = setInterval(tick,250);
+    }
+  } else {
+    showNotice('Thời gian làm bài 15 phút. Giữ cho trình duyệt luôn mở trong suốt quá trình làm bài. Điền thông tin chính xác rồi bấm Bắt đầu làm bài. Điền sai không thể điền lại. Hết giờ, bài tự khóa và nộp tự động.');
+  }
+</script>
+</body>
+</html>
