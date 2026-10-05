@@ -121,6 +121,22 @@
     #noticeMessage { color: #b91c1c; font-size: 18px; font-weight: 700; line-height: 1.6; margin: 16px 0 22px; white-space: pre-line; }
     #noticeDialog .btn { background: #b91c1c; color: white; }
     #noticeDialog .btn:focus-visible { outline: 3px solid #1e40af; outline-offset: 4px; }
+    #countdown {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 1000;
+      min-width: 112px;
+      padding: 8px 14px;
+      border: 2px solid #1e40af;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+    #countdown.urgent { color: #b91c1c !important; border-color: #b91c1c; background: #fef2f2; }
+    body { padding-top: 86px; }
   </style>
 </head>
 <body>
@@ -178,7 +194,7 @@
   }
 
   // DÁN LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBtQfXTbVliOWNm6K2Wq3pyqvvYgca22BO57jjvq_tRXa9xDLm85MEZA2yDDgarTgXXQ/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM6udKe98_56PYJQ2Z637lkKoEn6a1Gi0-KnXO5Fk35klKjlr5cDKvx0Da4lD5ATnUWQ/exec";
  
   const STORAGE_KEY = 'tx1-timed-v3';
   let savedSession = null;
@@ -201,12 +217,41 @@
     persistSession();
   }
   let timerHandle;
+  let fiveMinuteWarned = savedSession?.fiveMinuteWarned || false;
+  let warningAudio = null;
+  function prepareWarningAudio() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        if (!warningAudio) warningAudio = new AudioContextClass();
+        warningAudio.resume().catch(() => {});
+      }
+    } catch (_) {}
+  }
+  function playWarningSound() {
+    if (!warningAudio || warningAudio.state !== 'running') return;
+    try {
+      const start = warningAudio.currentTime;
+      for (let i = 0; i < 3; i++) {
+        const oscillator = warningAudio.createOscillator();
+        const gain = warningAudio.createGain();
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(0, start + i * 0.3);
+        gain.gain.linearRampToValueAtTime(0.15, start + i * 0.3 + 0.02);
+        gain.gain.linearRampToValueAtTime(0, start + i * 0.3 + 0.2);
+        oscillator.connect(gain);
+        gain.connect(warningAudio.destination);
+        oscillator.start(start + i * 0.3);
+        oscillator.stop(start + i * 0.3 + 0.22);
+      }
+    } catch (_) {}
+  }
   function persistSession() {
     const answers = {};
     document.querySelectorAll('input[type="radio"]:checked').forEach(input => answers[input.name] = input.value);
     const info = {};
     ['hoTen','lop','stt'].forEach(id => info[id] = document.getElementById(id).value);
-    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({submissionId,deadline,frozenPayload,submitted,answers,info,snapshot:examSnapshot,monitoring})); } catch (_) {}
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({submissionId,deadline,frozenPayload,submitted,answers,info,snapshot:examSnapshot,monitoring,fiveMinuteWarned})); } catch (_) {}
   }
 
   // Dữ liệu nội dung đề thi gốc (Hoàn toàn không có đáp án, an toàn bảo mật)
@@ -382,6 +427,7 @@
     document.querySelectorAll('input').forEach(input => input.disabled = true);
   }
   async function startExam() {
+    prepareWarningAudio();
     if (deadline || !document.getElementById('quizForm').reportValidity()) return;
     if (!['hoTen','lop','stt'].every(id => document.getElementById(id).value.trim())) {
       showNotice('Vui lòng điền đầy đủ thông tin.'); return;
@@ -429,7 +475,15 @@
     if (!deadline || submitted) return;
     const seconds = Math.max(0, Math.ceil((deadline-Date.now())/1000));
     document.getElementById('countdown').innerText = String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
-    if (seconds <= 60) document.getElementById('countdown').style.color = '#dc2626';
+    if (seconds <= 300) {
+      document.getElementById('countdown').classList.add('urgent');
+      if (!fiveMinuteWarned && seconds > 0 && !frozenPayload) {
+        fiveMinuteWarned = true;
+        document.getElementById('timerNotice').innerText = 'Còn 5 phút hoặc ít hơn. Hãy kiểm tra bài trước khi hết giờ.';
+        playWarningSound();
+        persistSession();
+      }
+    }
     if (seconds === 0) {
       clearInterval(timerHandle);
       if (!frozenPayload) frozenPayload = capturePayload(true);
@@ -474,6 +528,8 @@
       console.error(err);
     } finally { clearTimeout(timeout); sending = false; }
   }
+  document.addEventListener('pointerdown',prepareWarningAudio,{once:true});
+  document.addEventListener('keydown',prepareWarningAudio,{once:true});
   document.getElementById('quizForm').addEventListener('change',persistSession);
   document.getElementById('questionsContainer').addEventListener('pointerdown', () => {
     if (deadline && Date.now() >= deadline) tick();
