@@ -504,7 +504,7 @@
     const btn = document.getElementById('btnSubmit');
     const status = document.getElementById('statusDisplay');
     btn.disabled = true;
-    status.innerText = 'Đang gửi bài về hệ thống...';
+    status.innerText = 'Bài đã khóa. Đang gửi và chờ xác nhận, vui lòng giữ nguyên trang…';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
     try {
@@ -522,8 +522,10 @@
       document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
       showNotice('Bài đã lưu thành công. Mã bài: '+submissionId);
     } catch (err) {
-      status.innerText = 'Bài đã khóa. Chưa xác nhận lưu được; bấm Nộp lại khi có mạng.';
-      btn.innerText = 'Nộp lại bài đã khóa';
+      status.innerText = 'Bài vẫn được giữ trong tab này. Chưa nhận được xác nhận từ hệ thống. Mã bài: ' + submissionId;
+      document.getElementById('timerNotice').innerText = 'Hệ thống chưa phản hồi xác nhận. Bài có thể đã được lưu. Giữ nguyên tab, bấm Gửi lại để xác nhận hoặc báo giáo viên kèm mã bài.';
+      showNotice('Chưa nhận được xác nhận từ hệ thống. Điều này không có nghĩa là bài đã mất.\nBài có thể đã được lưu trên Google Sheet.\nGiữ nguyên tab và bấm “Gửi lại để xác nhận”. Nếu vẫn chưa được, báo giáo viên mã bài:\n' + submissionId);
+      btn.innerText = 'Gửi lại để xác nhận';
       btn.disabled = false;
       console.error(err);
     } finally { clearTimeout(timeout); sending = false; }
@@ -573,7 +575,7 @@
       document.getElementById('statusDisplay').innerText = 'Đã lưu bài thành công!';
       document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
     } else if (frozenPayload) {
-      document.getElementById('btnSubmit').innerText = 'Nộp lại bài đã khóa';
+      document.getElementById('btnSubmit').innerText = 'Gửi lại để xác nhận';
       submitExam(true);
     } else {
       tick();
