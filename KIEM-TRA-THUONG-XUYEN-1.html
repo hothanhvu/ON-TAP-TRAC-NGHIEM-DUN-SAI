@@ -121,25 +121,47 @@
     #noticeMessage { color: #b91c1c; font-size: 18px; font-weight: 700; line-height: 1.6; margin: 16px 0 22px; white-space: pre-line; }
     #noticeDialog .btn { background: #b91c1c; color: white; }
     #noticeDialog .btn:focus-visible { outline: 3px solid #1e40af; outline-offset: 4px; }
-    #countdown {
+    #examClockBar {
       position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 1000;
-      min-width: 112px;
-      padding: 8px 14px;
-      border: 2px solid #1e40af;
-      border-radius: 10px;
-      background: #ffffff;
-      box-shadow: 0 4px 14px rgba(0,0,0,.2);
-      font-variant-numeric: tabular-nums;
-      text-align: center;
+      inset: 0 0 auto 0;
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 12px;
+      background: #fff;
+      border-bottom: 2px solid #1e40af;
+      box-shadow: 0 3px 12px rgba(0,0,0,.18);
+      color: #1e40af;
+      font-weight: 700;
     }
-    #countdown.urgent { color: #b91c1c !important; border-color: #b91c1c; background: #fef2f2; }
-    body { padding-top: 86px; }
+    #countdown {
+      font-size: 32px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.3;
+      min-width: 108px;
+      text-align: center;
+      padding: 3px 12px;
+      border: 2px solid currentColor;
+      border-radius: 8px;
+    }
+    #examClockBar.urgent { color: #b91c1c; border-color: #b91c1c; background: #fef2f2; }
+    body { padding-top: 90px; }
+    @media (max-width: 480px) {
+      #examClockBar { gap: 8px; font-size: 13px; }
+      #countdown { font-size: 28px; min-width: 96px; }
+      .controls { flex-wrap: wrap; gap: 10px; }
+      .status-msg { overflow-wrap: anywhere; }
+    }
   </style>
 </head>
 <body>
+<div id="examClockBar" aria-label="Đồng hồ bài kiểm tra">
+  <span id="clockLabel">Thời gian còn lại</span>
+  <span id="countdown" role="timer" aria-live="off">15:00</span>
+</div>
 
 <div class="container">
   <header>
@@ -167,7 +189,6 @@
     <!-- KHUNG CHỨA CÁC CÂU HỎI TRỘN TỰ ĐỘNG -->
     <div class="question-card" style="text-align:center" role="status">
       <strong>Thời gian làm bài: 15 phút</strong>
-      <div id="countdown" style="font-size:32px;font-weight:700;color:#1e40af" aria-label="Thời gian còn lại">15:00</div>
       <p id="timerNotice">Điền đủ thông tin rồi bấm Bắt đầu làm bài. Hết giờ, bài tự khóa và nộp. Khi bắt đầu, trang yêu cầu toàn màn hình; số lần trang bị ẩn và thoát toàn màn hình được ghi nhận.</p>
       <button type="button" class="btn btn-submit" id="btnStart" onclick="startExam()">Bắt đầu làm bài</button>
     </div>
@@ -204,6 +225,7 @@
   let frozenPayload = savedSession?.frozenPayload || null;
   let submitted = savedSession?.submitted || false;
   let sending = false;
+  let starting = false;
   let monitoring = savedSession?.monitoring || {hiddenCount:0, fullscreenExitCount:0, events:[]};
   let returnWarning = false;
   let fullscreenWasActive = false;
@@ -428,10 +450,12 @@
   }
   async function startExam() {
     prepareWarningAudio();
-    if (deadline || !document.getElementById('quizForm').reportValidity()) return;
+    if (deadline || starting || !document.getElementById('quizForm').reportValidity()) return;
     if (!['hoTen','lop','stt'].every(id => document.getElementById(id).value.trim())) {
       showNotice('Vui lòng điền đầy đủ thông tin.'); return;
     }
+    starting = true;
+    document.getElementById('btnStart').disabled = true;
     try {
       if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
@@ -444,6 +468,7 @@
       showNotice('Không bật được toàn màn hình. Bạn vẫn có thể làm bài; trạng thái này được ghi nhận.');
     }
     deadline = Date.now() + 15 * 60 * 1000;
+    starting = false;
     ['hoTen','lop','stt'].forEach(id => document.getElementById(id).disabled = true);
     document.getElementById('questionsContainer').hidden = false;
     document.getElementById('btnStart').hidden = true;
@@ -476,7 +501,7 @@
     const seconds = Math.max(0, Math.ceil((deadline-Date.now())/1000));
     document.getElementById('countdown').innerText = String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
     if (seconds <= 300) {
-      document.getElementById('countdown').classList.add('urgent');
+      document.getElementById('examClockBar').classList.add('urgent');
       if (!fiveMinuteWarned && seconds > 0 && !frozenPayload) {
         fiveMinuteWarned = true;
         document.getElementById('timerNotice').innerText = 'Còn 5 phút hoặc ít hơn. Hãy kiểm tra bài trước khi hết giờ.';
@@ -484,7 +509,7 @@
         persistSession();
       }
     }
-    if (seconds === 0) {
+    if (seconds === 0 && !frozenPayload) {
       clearInterval(timerHandle);
       if (!frozenPayload) frozenPayload = capturePayload(true);
       lockAnswers();
@@ -519,6 +544,7 @@
       clearInterval(timerHandle);
       persistSession();
       status.innerText = 'Đã lưu bài thành công!';
+      document.getElementById('clockLabel').innerText = 'Bài đã nộp';
       document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
       showNotice('Bài đã lưu thành công. Mã bài: '+submissionId);
     } catch (err) {
@@ -532,6 +558,7 @@
   }
   document.addEventListener('pointerdown',prepareWarningAudio,{once:true});
   document.addEventListener('keydown',prepareWarningAudio,{once:true});
+  document.getElementById('quizForm').addEventListener('submit', event => event.preventDefault());
   document.getElementById('quizForm').addEventListener('change',persistSession);
   document.getElementById('questionsContainer').addEventListener('pointerdown', () => {
     if (deadline && Date.now() >= deadline) tick();
@@ -572,6 +599,9 @@
     document.getElementById('btnSubmit').disabled = submitted;
     if (frozenPayload || submitted) lockAnswers();
     if (submitted) {
+      const seconds = Math.max(0, Math.ceil((deadline - Date.parse(frozenPayload?.endedAt || new Date().toISOString())) / 1000));
+      document.getElementById('countdown').innerText = String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
+      document.getElementById('clockLabel').innerText = 'Bài đã nộp';
       document.getElementById('statusDisplay').innerText = 'Đã lưu bài thành công!';
       document.getElementById('timerNotice').innerText = 'Bài đã nộp và khóa.';
     } else if (frozenPayload) {
